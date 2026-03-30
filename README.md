@@ -1,16 +1,24 @@
-# 📸 AI Photobooth MK-v1.0
+# 📸 AI Photobooth v2.0 - Stable Edition
 
-ဤပရောဂျက်သည် Android ဖုန်းပေါ်တွင် Python/Flask အသုံးပြု၍ တည်ဆောက်ထားသော Photobooth Application ဖြစ်ပါသည်။
-This is a professional photobooth application developed on Android (Termux) using Python/Flask.
+A web-based professional photobooth application developed with Flask and Vanilla JavaScript. This version (v2.0) focuses on user-controlled photography with flexible layout options and selective editing.
 
-## 🚀 Features (v1.0) - လုပ်ဆောင်ချက်များ
+## 🚀 Key Features (v2.0 Updates)
+- **Dynamic Photo Selection:** Choose between 1 to 6 total photos before starting the session.
+- **Orientation Switching:** Support for both **Portrait (3:4)** and **Landscape (4:3)** modes per photo.
+- **Selective Retake (Smart Edit):** Tap any photo in the library to re-capture it without restarting the entire session.
+- **Improved Compatibility:** Optimized camera initialization script for mobile and desktop browsers (v2.8 based stable core).
+- **Responsive UI:** Dark-themed professional interface designed for 1200px+ screens and mobile devices.
 
-- ဓာတ်ပုံမရိုက်မီ ၃ စက္ကန့် Countdown ရေတွက်ခြင်း (3s Countdown Timer)
-- ရိုက်ပြီးသားပုံများကို ဖုန်းထဲတွင် အလိုအလျောက်သိမ်းဆည်းခြင်း (Auto-Save to Server)
-- ရိုက်ပြီးသားပုံကို ချက်ချင်းပြန်မြင်ရခြင်း (Instant Preview)
+## 🛠️ Technology Stack
+- **Backend:** Python (Flask)
+- **Frontend:** HTML5, CSS3, JavaScript (ES6+)
+- **Hardware Access:** MediaDevices API (getUserMedia)
 
-## 🛠️ Tech Stack - အသုံးပြုထားသော နည်းပညာများ
-- Backend: Python 3, Flask
-- Frontend: HTML5, CSS3, JavaScript
-- Platform: Android (Termux)
+## 📂 Project Structure
+```text
+├── app.py              # Flask Backend Server
+├── templates/
+│   └── index.html      # Main Photobooth UI (v2.0)
+└── static/
+    └── photos/         # Saved captures (Future use)
 

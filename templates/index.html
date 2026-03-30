@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Photobooth Full-v3.1</title>
+    <style>
+        :root { --primary: #00ff88; --bg: #121212; --card: #1e1e1e; --snap: #ffc107; --next: #0088ff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 1200px; background: var(--card); padding: 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+        .setup-panel { background: #252525; padding: 20px; border-radius: 15px; margin-bottom: 15px; text-align: center; }
+        select, .btn-start { padding: 12px; border-radius: 10px; border: none; font-size: 1rem; width: 100%; max-width: 300px; margin-top: 10px; cursor: pointer; }
+        .btn-start { background: var(--primary); font-weight: bold; }
+
+        .main-layout { display: none; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 992px) { .main-layout { grid-template-columns: 1.5fr 1fr; } }
+
+        .video-box { position: relative; border-radius: 15px; overflow: hidden; border: 3px solid #333; background: #000; width: 100%; aspect-ratio: 3/4; }
+        #video { width: 100%; height: 100%; object-fit: cover; }
+        #countdown { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 6rem; font-weight: bold; color: var(--primary); z-index: 10; display: none; }
+
+        .orient-zone { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; }
+        .btn-orient { background: #333; color: white; border: 1px solid #555; padding: 5px 15px; border-radius: 15px; cursor: pointer; }
+        .btn-orient.active { background: var(--next); border-color: var(--next); }
+
+        .action-area { display: flex; justify-content: center; gap: 20px; margin: 15px 0; min-height: 90px; }
+        .btn-circle { width: 80px; height: 80px; border-radius: 50%; border: 5px solid #444; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-snap { background: var(--snap); color: black; }
+        .btn-next { background: var(--next); color: white; display: none; }
+
+        .library-area { background: #151515; padding: 15px; border-radius: 15px; }
+        .photo-library { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
+        .slot { background: #222; border: 2px solid #444; border-radius: 10px; overflow: hidden; cursor: pointer; position: relative; }
+        .slot.active-edit { border-color: var(--primary); box-shadow: 0 0 15px var(--primary); transform: scale(1.05); }
+        .slot img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .slot::after { content: attr(data-label); position: absolute; top: 5px; left: 5px; font-size: 0.7rem; background: rgba(0,0,0,0.6); padding: 2px 5px; border-radius: 3px; }
+        
+        .slot.portrait { aspect-ratio: 3/4; }
+        .slot.landscape { aspect-ratio: 4/3; }
+
+        .btn-done { background: gold; color: black; width: 100%; font-weight: bold; padding: 15px; border-radius: 10px; border: none; margin-top: 20px; cursor: pointer; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>📸 Pro Photobooth v3.1</h3>
+
+        <div id="setupZone" class="setup-panel">
+            <label>Total Photos (1-6):</label><br>
+            <select id="maxPhotos">
+                <option value="1">1 Photo</option>
+                <option value="2">2 Photos</option>
+                <option value="3">3 Photos</option>
+                <option value="4" selected>4 Photos</option>
+                <option value="5">5 Photos</option>
+                <option value="6">6 Photos</option>
+            </select><br>
+            <button class="btn-start" onclick="initBooth()">START SESSION</button>
+        </div>
+
+        <div id="boothUI" class="main-layout">
+            <div class="camera-section">
+                <div class="orient-zone">
+                    <button class="btn-orient active" id="btnP" onclick="setOrientation('portrait')">Portrait</button>
+                    <button class="btn-orient" id="btnL" onclick="setOrientation('landscape')">Landscape</button>
+                </div>
+                <div id="status" style="color: var(--primary); font-weight: bold; text-align: center; margin-bottom: 5px;">Ready!</div>
+                <div class="video-box" id="videoBox">
+                    <div id="countdown"></div>
+                    <video id="video" autoplay playsinline></video>
+                </div>
+                <div class="action-area">
+                    <button class="btn-circle btn-snap" id="capBtn" onclick="startTimer()">SNAP</button>
+                    <button class="btn-circle btn-next" id="nextBtn" onclick="nextPhoto()">NEXT</button>
+                </div>
+            </div>
+
+            <div class="library-area">
+                <p style="font-size: 0.8rem; color: #888;">SELECT TO RETAKE</p>
+                <div class="photo-library" id="library"></div>
+                <button class="btn-done" id="doneBtn" onclick="alert('Starting AI Background Removal...')">FINISH</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let maxPhotos = 4; let currentIdx = 1; let currentOrientation = 'portrait';
+        const video = document.getElementById('video');
+
+        function initBooth() {
+            maxPhotos = parseInt(document.getElementById('maxPhotos').value);
+            navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+                video.srcObject = s;
+                document.getElementById('setupZone').style.display = 'none';
+                document.getElementById('boothUI').style.display = 'grid';
+                renderLibrary();
+                selectSlot(1);
+            }).catch(e => alert("Camera error!"));
+        }
+
+        function renderLibrary() {
+            const lib = document.getElementById('library'); lib.innerHTML = '';
+            for(let i=1; i<=maxPhotos; i++) {
+                lib.innerHTML += `<div class="slot portrait" id="slot-${i}" data-label="No.${i}" onclick="selectSlot(${i})"><img id="prev-${i}"></div>`;
+            }
+        }
+
+        function selectSlot(idx) {
+            currentIdx = idx;
+            document.querySelectorAll('.slot').forEach(s => s.classList.remove('active-edit'));
+            document.getElementById(`slot-${idx}`).classList.add('active-edit');
+            document.getElementById('status').innerText = `Capturing: Photo ${idx}`;
+            document.getElementById('capBtn').innerText = document.getElementById(`prev-${idx}`).src ? "RETAKE" : "SNAP";
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        function setOrientation(o) {
+            currentOrientation = o;
+            document.getElementById('videoBox').style.aspectRatio = (o === 'portrait') ? '3/4' : '4/3';
+            document.getElementById('btnP').classList.toggle('active', o === 'portrait');
+            document.getElementById('btnL').classList.toggle('active', o === 'landscape');
+        }
+
+        function startTimer() {
+            document.getElementById('capBtn').disabled = true;
+            let count = 3; const cd = document.getElementById('countdown');
+            cd.style.display = 'block'; cd.innerText = count;
+            const timer = setInterval(() => {
+                if(--count > 0) cd.innerText = count;
+                else { clearInterval(timer); cd.style.display = 'none'; capture(); }
+            }, 1000);
+        }
+
+        function capture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            const slot = document.getElementById(`slot-${currentIdx}`);
+            slot.className = `slot active-edit ${currentOrientation}`;
+            
+            const img = document.getElementById(`prev-${currentIdx}`);
+            img.src = canvas.toDataURL('image/png');
+            img.style.display = 'block';
+            
+            document.getElementById('capBtn').innerText = "RETAKE";
+            document.getElementById('capBtn').disabled = false;
+            
+            checkProgress();
+        }
+
+        function checkProgress() {
+            let allCaptured = true;
+            for(let i=1; i<=maxPhotos; i++) if(!document.getElementById(`prev-${i}`).src) allCaptured = false;
+            if(allCaptured) document.getElementById('doneBtn').style.display = 'block';
+            if(currentIdx < maxPhotos) document.getElementById('nextBtn').style.display = 'flex';
+        }
+
+        function nextPhoto() { if(currentIdx < maxPhotos) selectSlot(currentIdx + 1); }
+    </script>
+</body>
+</html>
+
