@@ -1,0 +1,6 @@
+--2026-04-08 17:39:21--  https://api.qrserver.com/v1/create-qr-code/?size=250x250
+Resolving api.qrserver.com (api.qrserver.com)... 195.201.128.178, 88.99.85.235, 95.216.163.127, ...
+Connecting to api.qrserver.com (api.qrserver.com)|195.201.128.178|:443... connected.
+HTTP request sent, awaiting response... 400 Bad Request
+2026-04-08 17:39:23 ERROR 400: Bad Request.
+

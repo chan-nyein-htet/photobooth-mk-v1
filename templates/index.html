@@ -1,258 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Photobooth v5.7.0</title>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4/face_detection.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous"></script>
-    
-    <style>
-        :root { --primary: #00ff88; --bg: #000; --snap: #ffc107; --card: #121212; --danger: #ff4444; }
-        body { font-family: sans-serif; background: var(--bg); color: white; margin: 0; height: 100vh; overflow: hidden; }
-        
-        .app-shell { display: flex; height: 100vh; width: 100vw; }
-        @media (max-width: 900px) { .app-shell { flex-direction: column; overflow-y: auto; } }
-
-        .live-section { 
-            position: relative; 
-            flex-grow: 1; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            background: #000; 
-            overflow: hidden;
-        }
-        
-        .header-nav { position: absolute; top: 0; left: 0; width: 100%; padding: 10px; display: flex; gap: 8px; z-index: 1000; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
-        .back-btn { background: #333; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .mode-chip { padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.1); color: #fff; cursor: pointer; font-size: 11px; }
-        .mode-chip.active { background: var(--primary); color: black; font-weight: bold; }
-
-        /* --- DYNAMIC FIXED CONTAINER --- */
-        .vf-container { 
-            position: relative; 
-            background: #111; 
-            border: 4px solid #333;
-            border-radius: 20px;
-            overflow: hidden; 
-            transition: all 0.4s ease; /* ပုံစံပြောင်းရင် ချောချောမွေ့မွေ့ဖြစ်အောင် */
-            box-shadow: 0 0 50px rgba(0,0,0,1);
-        }
-
-        /* Default Portrait Size */
-        .mode-portrait { width: 450px; height: 800px; max-width: 90vw; max-height: 80vh; }
-        /* Default Landscape Size */
-        .mode-landscape { width: 800px; height: 450px; max-width: 90vw; max-height: 80vh; }
-
-        #liveCanvas, #previewImg { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            transform: scaleX(-1); 
-        }
-
-        #previewImg { position: absolute; inset: 0; z-index: 4000; display: none; }
-
-        /* BUTTONS */
-        .snap-overlay { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 5000; display: flex; gap: 20px; }
-        .btn-circle { width: 75px; height: 75px; border-radius: 50%; border: 5px solid rgba(255,255,255,0.4); cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 12px; }
-        .snap-btn-style { background: var(--snap); color: black; }
-        .retake-btn-style { background: var(--danger); color: white; }
-        .keep-btn-style { background: var(--primary); color: black; text-align: center; line-height: 1.1; }
-
-        /* SIDEBAR */
-        .control-panel { width: 340px; background: #0a0a0a; border-left: 1px solid #222; padding: 20px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; z-index: 100; }
-        @media (max-width: 900px) { .control-panel { width: 100%; border-left: none; height: auto; padding-bottom: 40px; } }
-        .label { font-size: 11px; color: var(--primary); font-weight: bold; margin-bottom: 8px; display: block; }
-        .item-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; }
-        .box { width: 55px; height: 55px; background: #1a1a1a; border-radius: 12px; flex-shrink: 0; border: 2px solid #333; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .box.active { border-color: var(--primary); }
-        .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .slot { background: #111; aspect-ratio: 1; border-radius: 12px; border: 1px solid #222; overflow: hidden; }
-        .slot img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* MODALS */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; display: none; align-items: center; justify-content: center; }
-        .modal-card { background: var(--card); padding: 30px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; border: 1px solid #333; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-btns button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-
-        #setup { position: fixed; inset: 0; background: #000; z-index: 8000; display: flex; align-items: center; justify-content: center; }
-        .setup-card { background: var(--card); padding: 30px; border-radius: 24px; width: 85%; max-width: 360px; text-align: center; border: 1px solid #333; }
-        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-        .num-btn { padding: 15px; border-radius: 12px; border: 1px solid #444; background: #1a1a1a; color: white; cursor: pointer; }
-        .num-btn.active { background: var(--primary); color: black; font-weight: bold; border-color: var(--primary); }
-    </style>
+    <title>AI Photobooth Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4/face_detection.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body class="bg-black text-white">
+    <div id="welcomeScreen" class="active-screen">
+        <div class="modal-box-custom">
+            <h1 class="text-5xl font-black text-primary mb-2 italic uppercase tracking-tighter">AI PHOTO</h1>
+            <p class="text-xs opacity-40 mb-10 tracking-widest uppercase">Premium Booth Experience</p>
+            <button id="startPaymentBtn" class="btn btn-primary w-full h-20 rounded-3xl font-black text-xl shadow-lg" onclick="window.startPaymentFlow()">START SESSION</button>
+        </div>
+    </div>
 
-    <div id="backModal" class="modal-overlay">
-        <div class="modal-card">
-            <h3>Exit Session?</h3>
-            <div class="modal-btns">
-                <button onclick="hideBackModal()" style="background:#333; color:white;">No</button>
-                <button onclick="location.reload()" style="background:var(--danger); color:white;">Yes</button>
+    <div id="paymentScreen" class="hidden-element">
+        <div class="modal-box-custom">
+            <h1 class="text-4xl font-black mb-2 tracking-tighter uppercase">Scan to Pay</h1>
+            <div class="bg-white p-4 rounded-3xl mb-6 mx-auto w-fit mt-4">
+                <img id="qrCode" src="/static/assets/payment_qr.png" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=PAY_NOW'">
+            </div>
+            <div class="bg-white/5 rounded-2xl p-4 mb-8 text-center">
+                <p class="text-[10px] opacity-50 uppercase font-bold">Order ID</p>
+                <p id="displayOrderID" class="text-2xl font-mono font-black text-primary tracking-widest">--------</p>
+            </div>
+            <div class="flex items-center justify-center gap-3 text-primary font-bold">
+                <span class="loading loading-ring loading-md"></span>
+                <span class="animate-pulse">WAITING FOR PAYMENT...</span>
             </div>
         </div>
     </div>
 
-    <div id="setup">
-        <div class="setup-card">
-            <h2 style="margin:0; color:var(--primary);">AI Photobooth</h2>
-            <div class="num-grid" id="numGrid">
-                <button class="num-btn" onclick="selectShots(1, this)">1</button>
-                <button class="num-btn" onclick="selectShots(2, this)">2</button>
-                <button class="num-btn" onclick="selectShots(3, this)">3</button>
-                <button class="num-btn active" onclick="selectShots(4, this)">4</button>
-                <button class="num-btn" onclick="selectShots(5, this)">5</button>
-                <button class="num-btn" onclick="selectShots(6, this)">6</button>
+    <div id="setup" class="hidden-element">
+        <div class="modal-box-custom">
+            <h2 class="text-3xl font-black text-primary mb-8 italic uppercase tracking-tighter">Select Shots</h2>
+            <div class="grid grid-cols-3 gap-3 mb-10">
+                <button class="num-btn btn btn-outline border-white/10 rounded-2xl" onclick="window.selectShots(1, this)">1</button>
+                <button class="num-btn btn btn-outline border-white/10 rounded-2xl" onclick="window.selectShots(2, this)">2</button>
+                <button class="num-btn btn btn-outline border-white/10 rounded-2xl" onclick="window.selectShots(3, this)">3</button>
+                <button class="num-btn btn btn-outline border-white/10 rounded-2xl btn-active btn-primary" onclick="window.selectShots(4, this)">4</button>
+                <button class="num-btn btn btn-outline border-white/10 rounded-2xl" onclick="window.selectShots(5, this)">5</button>
+                <button class="num-btn btn btn-outline border-white/10 rounded-2xl" onclick="window.selectShots(6, this)">6</button>
             </div>
-            <button onclick="initApp()" style="width:100%; padding:18px; background:var(--primary); border:none; border-radius:12px; font-weight:bold; cursor:pointer;">START BOOTH</button>
+            <button id="startAppBtn" class="btn btn-primary w-full h-16 rounded-3xl font-black text-lg" onclick="window.startCameraFlow()">LET'S SHOOT</button>
         </div>
     </div>
 
-    <div class="app-shell" id="mainApp" style="display:none;">
-        <div class="live-section">
-            <div class="header-nav">
-                <button class="back-btn" onclick="showBackModal()">⇠ BACK</button>
-                <button class="mode-chip active" id="pBtn" onclick="setMode('portrait')">PORTRAIT</button>
-                <button class="mode-chip" id="lBtn" onclick="setMode('landscape')">LANDSCAPE</button>
-            </div>
+    <div class="app-shell" id="mainApp">
+        <aside class="sidebar-left">
+            <span class="text-[10px] font-black opacity-40 uppercase mb-4">Filters</span>
+            <div class="asset-grid" id="effectList"></div>
+            <p class="text-[10px] font-black opacity-40 uppercase mt-8 mb-4">Props</p>
+            <div class="asset-grid" id="stickerList"></div>
+        </aside>
 
+        <main class="viewport">
+            <div class="top-bar flex justify-between w-full max-w-lg mb-4 px-2">
+                <button class="btn btn-xs btn-outline rounded-lg" onclick="window.toggleOrientation()">
+                    <i class="fa-solid fa-rotate"></i> <span id="orientationText">PORTRAIT</span>
+                </button>
+                <button class="btn btn-xs btn-neutral rounded-lg px-4" onclick="window.showBackModal()">BACK</button>
+            </div>
             <div class="vf-container mode-portrait" id="vfContainer">
-                <div id="countdown" style="position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); font-size:120px; color:var(--primary); font-weight:bold; z-index:5500; display:none;"></div>
-                <canvas id="liveCanvas"></canvas>
-                <img id="previewImg">
-                <video id="video" autoplay playsinline muted style="display:none;"></video>
-                
-                <div class="snap-overlay">
-                    <button id="snapBtn" class="btn-circle snap-btn-style" onclick="startCapture()">SNAP</button>
-                    <div id="postCaptureBtns" style="display:none; gap:15px;">
-                        <button class="btn-circle retake-btn-style" onclick="retakePhoto()">RETAKE</button>
-                        <button class="btn-circle keep-btn-style" onclick="keepPhoto()">KEEP &<br>NEXT</button>
+                <div id="countdown" class="absolute inset-0 z-50 flex items-center justify-center text-8xl font-black text-primary pointer-events-none" style="display:none;"></div>
+                <canvas id="liveCanvas" class="w-full h-full object-cover"></canvas>
+                <img id="previewImg" class="hidden-element w-full h-full object-cover">
+                <video id="video" autoplay playsinline muted class="hidden"></video>
+                <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-50">
+                    <button id="snapBtn" class="w-20 h-20 rounded-full border-8 border-white bg-warning" onclick="window.startCapture()"></button>
+                    <div id="postCaptureBtns" class="hidden-element flex gap-4">
+                        <button class="btn btn-circle btn-lg btn-error" onclick="window.retakePhoto()"><i class="fa-solid fa-x"></i></button>
+                        <button class="btn btn-circle btn-lg btn-primary" onclick="window.keepPhoto()"><i class="fa-solid fa-check"></i></button>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
 
-        <div class="control-panel">
-            <div>
-                <span class="label">STICKERS</span>
-                <div class="item-scroll" id="stickerList">
-                    <div class="box active" onclick="useSticker(null, this)"><span style="font-size:10px">NONE</span></div>
-                </div>
-            </div>
-            <div>
-                <span class="label">GALLERY</span>
-                <div class="gallery" id="photoGrid"></div>
+        <aside class="sidebar-right">
+            <span class="text-[10px] font-black opacity-40 uppercase mb-4">Gallery</span>
+            <div id="photoGrid" class="gallery-grid grid grid-cols-2 gap-2 mb-4"></div>
+            <button id="finishBtn" onclick="window.handleContinue()" class="btn btn-primary btn-lg w-full rounded-2xl font-black uppercase hidden-element">Finish</button>
+        </aside>
+    </div>
+
+    <div id="backModal" class="fixed inset-0 z-[100000] bg-black/80 backdrop-blur-sm hidden-element flex items-center justify-center">
+        <div class="bg-[#111] p-8 rounded-[32px] text-center border border-white/10 w-80 shadow-2xl">
+            <p class="mb-6 font-bold">Reset Session?</p>
+            <div class="flex gap-2">
+                <button onclick="window.hideBackModal()" class="btn btn-sm flex-1">No</button>
+                <button onclick="window.resetAndBack()" class="btn btn-sm btn-error flex-1">Yes</button>
             </div>
         </div>
     </div>
 
-    <script>
-        let shotLimit = 4; let currentShot = 0; let tempImgData = null;
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('liveCanvas');
-        const ctx = canvas.getContext('2d');
-        const previewImg = document.getElementById('previewImg');
-        const vfContainer = document.getElementById('vfContainer');
-        let activeSticker = null;
-
-        function selectShots(n, btn) {
-            shotLimit = n;
-            document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
-        function showBackModal() { document.getElementById('backModal').style.display = 'flex'; }
-        function hideBackModal() { document.getElementById('backModal').style.display = 'none'; }
-
-        // --- MANUALLY CHANGE FIXED MODES ---
-        function setMode(mode) {
-            if(mode === 'portrait') {
-                vfContainer.className = 'vf-container mode-portrait';
-                document.getElementById('pBtn').classList.add('active');
-                document.getElementById('lBtn').classList.remove('active');
-            } else {
-                vfContainer.className = 'vf-container mode-landscape';
-                document.getElementById('lBtn').classList.add('active');
-                document.getElementById('pBtn').classList.remove('active');
-            }
-        }
-
-        async function initApp() {
-            document.getElementById('setup').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'flex';
-            const grid = document.getElementById('photoGrid');
-            grid.innerHTML = '';
-            for(let i=0; i<shotLimit; i++) grid.innerHTML += `<div class="slot"><img id="shot-${i}" style="width:100%; display:none;"></div>`;
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
-            video.srcObject = stream;
-            new Camera(video, { onFrame: async () => { await faceDet.send({image: video}); }, width: 1280, height: 720 }).start();
-        }
-
-        const faceDet = new FaceDetection({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4/${f}` });
-        faceDet.setOptions({ model: 'short', minDetectionConfidence: 0.6 });
-        faceDet.onResults((res) => {
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-            ctx.save(); ctx.scale(-1, 1); ctx.translate(-canvas.width, 0);
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            if (res.detections.length > 0 && activeSticker) {
-                const b = res.detections[0].boundingBox;
-                const x = b.xCenter * canvas.width; const y = b.yCenter * canvas.height;
-                const w = b.width * canvas.width * 1.8;
-                ctx.drawImage(activeSticker, x - w/2, y - w/1.5, w, w);
-            }
-            ctx.restore();
-        });
-
-        function startCapture() {
-            if(currentShot >= shotLimit) return;
-            document.getElementById('snapBtn').style.display = 'none';
-            let count = 3; const el = document.getElementById('countdown'); el.style.display = 'block';
-            const timer = setInterval(() => {
-                el.innerText = count;
-                if(count <= 0) { 
-                    clearInterval(timer); el.style.display = 'none'; 
-                    tempImgData = canvas.toDataURL('image/jpeg');
-                    previewImg.src = tempImgData;
-                    previewImg.style.display = 'block';
-                    document.getElementById('postCaptureBtns').style.display = 'flex';
-                }
-                count--;
-            }, 800);
-        }
-
-        function retakePhoto() {
-            previewImg.style.display = 'none';
-            document.getElementById('postCaptureBtns').style.display = 'none';
-            document.getElementById('snapBtn').style.display = 'block';
-            tempImgData = null;
-        }
-
-        function keepPhoto() {
-            const img = document.getElementById(`shot-${currentShot}`);
-            img.src = tempImgData;
-            img.style.display = 'block';
-            currentShot++;
-            retakePhoto();
-        }
-
-        const stickerData = [
-            'https://cdn-icons-png.flaticon.com/512/3039/3039233.png',
-            'https://cdn-icons-png.flaticon.com/512/616/616408.png',
-            'https://cdn-icons-png.flaticon.com/512/2912/2912258.png'
-        ];
-        stickerData.forEach(url => {
-            const b = document.createElement('div'); b.className = 'box'; b.innerHTML = `<img src="${url}">`;
-            b.onclick = () => {
-                const i = new Image(); i.crossOrigin = "anonymous"; i.src = url;
-                i.onload = () => { activeSticker = i; document.querySelectorAll('#stickerList .box').forEach(x=>x.classList.remove('active')); b.classList.add('active'); };
-            };
-            document.getElementById('stickerList').appendChild(b);
-        });
-    </script>
+    <script type="module" src="{{ url_for('static', filename='js/app.js') }}?v={{ range(1, 9999) | random }}"></script>
 </body>
 </html>
 
