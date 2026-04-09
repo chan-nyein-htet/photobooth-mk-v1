@@ -1,70 +1,63 @@
-// ✅ UI ဆိုတဲ့ object ထဲမှာ function တွေအကုန် စုထည့်လိုက်တာပါ
 export const UI = {
-    // app.js က လှမ်းခေါ်မယ့် init function
-    init: function() {
-        console.log("UI Module Initialized");
-    },
-
-    // မူရင်း renderEffects logic
-    renderEffects: function(effectData, canvas, previewImg) {
-        const effectList = document.getElementById('effectList');
-        if(!effectList) return;
-        effectList.innerHTML = '';
+    renderEffects(effectData, canvas, previewImg, onSelect) {
+        const list = document.getElementById('effectList');
+        if(!list) return;
+        list.innerHTML = '';
 
         effectData.forEach(eff => {
             const b = document.createElement('div');
-            b.className = 'box';
+            const isActive = eff.filter === 'none' || eff.filter === '';
+            b.className = `box ${isActive ? 'active' : ''}`;
             b.innerHTML = `
-                <div style="width:100%; height:100%; background:#222; filter:${eff.filter}; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; color:white; font-weight:bold;">
-                    FX
-                </div>
+                <div class="fx-preview" style="filter:${eff.filter}; width:100%; height:100%; background:#222; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; color:white;">FX</div>
                 <div class="effect-name-tag">${eff.name}</div>
             `;
 
-            if(eff.filter === 'none' || eff.filter === '') b.classList.add('active');
-
             b.onclick = () => {
-                canvas.style.filter = eff.filter;
-                previewImg.style.filter = eff.filter;
-                document.querySelectorAll('#effectList .box').forEach(x => x.classList.remove('active'));
-                b.classList.add('active');
+                if (onSelect) onSelect(eff.filter);
+                this._updateActive(list, b);
             };
-            effectList.appendChild(b);
+            list.appendChild(b);
         });
     },
 
-    // မူရင်း renderStickers logic
-    renderStickers: function(stickerData, onSelect) {
-        const stickerList = document.getElementById('stickerList');
-        if(!stickerList) return;
-        stickerList.innerHTML = '';
+    renderStickers(stickerData, onSelect) {
+        const list = document.getElementById('stickerList');
+        if(!list) return;
+        list.innerHTML = '';
 
-        const noneBtn = document.createElement('div');
-        noneBtn.className = 'box active';
-        noneBtn.innerHTML = `<span style="font-size:10px; color:#666;">NONE</span>`;
-        noneBtn.onclick = () => {
-            onSelect(null, '');
-            document.querySelectorAll('#stickerList .box').forEach(x => x.classList.remove('active'));
-            noneBtn.classList.add('active');
-        };
-        stickerList.appendChild(noneBtn);
-
+        this._createStickerBox('NONE', null, onSelect, list, true);
         stickerData.forEach(s => {
-            const b = document.createElement('div');
-            b.className = 'box';
-            b.innerHTML = `<img src="${s.url}" style="width:70%; height:70%; object-fit:contain;">`;
-            b.onclick = () => {
+            this._createStickerBox(null, s.url, onSelect, list, false);
+        });
+    },
+
+    _updateActive(parent, activeEl) {
+        parent.querySelectorAll('.box').forEach(x => x.classList.remove('active'));
+        activeEl.classList.add('active');
+    },
+
+    _createStickerBox(text, url, onSelect, parent, isActive) {
+        const b = document.createElement('div');
+        b.className = `box ${isActive ? 'active' : ''}`;
+        b.innerHTML = url ? `<img src="${url}" style="width:70%; height:70%; object-fit:contain;">` : `<span style="font-size:10px; color:#666;">${text}</span>`;
+        
+        b.onclick = () => {
+            if (!url) {
+                onSelect(null);
+                this._updateActive(parent, b);
+            } else {
                 const i = new Image();
                 i.crossOrigin = "anonymous";
-                i.src = s.url;
+                i.src = url;
                 i.onload = () => {
-                    onSelect(i, s.url);
-                    document.querySelectorAll('#stickerList .box').forEach(x => x.classList.remove('active'));
-                    b.classList.add('active');
+                    onSelect(i);
+                    this._updateActive(parent, b);
                 };
-            };
-            stickerList.appendChild(b);
-        });
+            }
+        };
+        parent.appendChild(b);
+        return b;
     }
 };
 
