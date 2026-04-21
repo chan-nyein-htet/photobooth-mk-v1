@@ -1,12 +1,15 @@
-* { box-sizing: border-box; }
+/* --- Global Reset --- */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
-    margin: 0; font-family: sans-serif; overflow: hidden; width: 100vw; height: 100vh;
-    background: #000; color: #fff;
-    touch-action: none; /* ✅ Disable pinch zoom on body */
+    margin: 0; font-family: ui-sans-serif, system-ui, sans-serif;
+    overflow: hidden; width: 100vw; height: 100vh;
+    background: #000; color: #fff; touch-action: none;
 }
 
+/* --- Core Screen Logic --- */
 .hidden-element { display: none !important; }
 
+/* Screens: Welcome, Payment, Setup */
 #welcomeScreen, #paymentScreen, #setup {
     position: fixed; inset: 0; width: 100vw; height: 100vh;
     z-index: 9000; background: #000;
@@ -19,22 +22,39 @@ body {
     display: flex !important;
 }
 
+/* 🕒 TIMER LOGIC: Pure CSS Controller */
+#countdown {
+    display: none; /* အစမှာ ဖျောက်ထားမယ် (HTML inline style မလိုတော့ဘူး) */
+    position: absolute;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* JS က style.display = 'flex' လို့ ပေးလိုက်တာနဲ့ ဒါက အလုပ်လုပ်မယ် */
+#countdown[style*="display: flex"] {
+    display: flex !important;
+}
+
 .modal-box-custom {
     background: #111; padding: 40px; border-radius: 40px;
     border: 1px solid rgba(255,255,255,0.05); text-align: center;
     width: 100%; max-width: 400px;
 }
 
+/* --- App Shell & Layout --- */
 .app-shell { display: none; height: 100vh; width: 100vw; overflow: hidden; flex-direction: row; }
+.app-shell:not(.hidden-element) { display: flex; }
 
-.viewport { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+.viewport { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: relative; }
 
 .vf-container {
     position: relative; background: #111; border-radius: 40px;
     overflow: hidden; width: 100%; transition: all 0.3s ease;
     border: 1px solid rgba(255,255,255,0.1);
 }
-
 .vf-container.mode-portrait { aspect-ratio: 9/16; max-height: 80vh; }
 .vf-container.mode-landscape { aspect-ratio: 16/9; max-height: 60vh; }
 
@@ -44,30 +64,22 @@ body {
 }
 
 .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
 .box {
     aspect-ratio: 1/1; background: #1a1a1a; border-radius: 50%; border: 2px solid transparent;
-    display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden;
-    width: 100%;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; width: 100%;
 }
-.box img { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 50%; display: block; }
-.box.active { border-color: oklch(var(--p)); box-shadow: 0 0 15px oklch(var(--p)/0.4); }
+.box img { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 50%; }
 
-.effect-name-tag { position: absolute; bottom: 0; font-size: 8px; width: 100%; text-align: center; background: rgba(0,0,0,0.6); }
-
+/* --- Mobile Responsive Logic (Original) --- */
 @media (max-width: 800px) {
-    .app-shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-    .viewport { width: 100% !important; order: 1; padding: 55px 10px 10px 10px; flex: 0 0 auto; background: #000; z-index: 10; }
-    .vf-container.mode-portrait { max-height: 38vh !important; width: auto !important; margin: 0 auto; }
-    .vf-container.mode-landscape { max-height: 35vh !important; width: 100% !important; }
-    #snapBtn { width: 60px !important; height: 60px !important; border-width: 5px !important; }
-    .sidebar-left, .sidebar-right { width: 100% !important; order: 2; flex: 1; overflow-y: auto; background: #000; padding: 5px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
-    .asset-grid { display: flex; overflow-x: auto; gap: 10px; padding: 10px 5px; -webkit-overflow-scrolling: touch; }
-    .box { width: 45px !important; height: 45px !important; flex-shrink: 0 !important; border-radius: 50% !important; background: #151515; border: 1.5px solid rgba(255,255,255,0.1); }
-    .box.active { border-color: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.5); }
-    .effect-name-tag { display: none; }
-    #photoGrid { display: flex; overflow-x: auto; gap: 8px; padding: 5px 0; }
-    .gallery-item-box { width: 55px; height: 80px; flex-shrink: 0; }
-    .top-bar { position: absolute; top: 15px; width: 95%; left: 2.5%; margin: 0; }
+    .app-shell { flex-direction: column; height: 100vh; }
+    .viewport { width: 100% !important; order: 1; padding: 55px 10px 10px 10px; flex: 0 0 auto; z-index: 10; }
+    .vf-container.mode-portrait { max-height: 38vh !important; }
+    .vf-container.mode-landscape { max-height: 35vh !important; }
+    .sidebar-left, .sidebar-right { width: 100% !important; order: 2; flex: 1; overflow-y: auto; padding: 5px 12px; }
+    .asset-grid { display: flex; overflow-x: auto; gap: 10px; scrollbar-width: none; }
+    .box { width: 45px !important; height: 45px !important; flex-shrink: 0 !important; }
+    .top-bar { position: absolute; top: 15px; width: 95%; left: 2.5%; z-index: 20; }
 }
 #backModal { z-index: 100000 !important; }
+

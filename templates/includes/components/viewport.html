@@ -1,0 +1,22 @@
+<main class="viewport">
+    <div class="top-bar flex justify-between w-full max-w-lg mb-4 px-2">
+        <button id="toggleOrientationBtn" class="btn btn-xs btn-outline rounded-lg">
+            <i class="fa-solid fa-rotate"></i> <span id="orientationText">PORTRAIT</span>
+        </button>
+        <button id="showBackModalBtn" class="btn btn-xs btn-neutral rounded-lg px-4">BACK</button>
+    </div>
+    <div class="vf-container mode-portrait" id="vfContainer">
+        <div id="countdown" class="absolute inset-0 z-50 flex items-center justify-center text-8xl font-black text-primary pointer-events-none"></div>
+        <canvas id="liveCanvas" class="w-full h-full object-cover"></canvas>
+        <img id="previewImg" class="hidden-element w-full h-full object-cover">
+        <video id="video" autoplay playsinline muted class="hidden"></video>
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-50">
+            <button id="snapBtn" class="w-20 h-20 rounded-full border-8 border-white bg-warning"></button>
+            <div id="postCaptureBtns" class="hidden-element flex gap-4">
+                <button id="retakeBtn" class="btn btn-circle btn-lg btn-error"><i class="fa-solid fa-x"></i></button>
+                <button id="keepBtn" class="btn btn-circle btn-lg btn-primary"><i class="fa-solid fa-check"></i></button>
+            </div>
+        </div>
+    </div>
+</main>
+

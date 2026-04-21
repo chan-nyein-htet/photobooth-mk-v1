@@ -1,42 +1,43 @@
 import { Setup } from './setup.js';
 import { Capture } from './capture.js';
-import { State } from './state.js';
 import { UI } from './ui.js';
 
 export const Events = {
     init() {
-        console.log("⚙️ UI Events Module Loaded");
+        console.log("⚙️ UI Events Module Loaded & Synced");
         this.bindCoreFlows();
         this.bindCaptureActions();
         this.bindSelectionLogic();
     },
 
     bindCoreFlows() {
-        // Yes, Reset Button (Back Modal)
-        const confirmBtn = document.getElementById('confirmResetBtn');
-        if (confirmBtn) {
-            confirmBtn.addEventListener('click', () => {
-                console.log("⚠️ Reset Confirmed.");
-                Setup.resetSession();
-            });
-        }
-
-        // No, Stay Button
-        document.getElementById('hideBackModalBtn')?.addEventListener('click', () => {
-            UI.hideModal('backModal');
+        // Welcome -> Payment
+        document.getElementById('startPaymentBtn')?.addEventListener('click', () => {
+            window.startPaymentFlow();
         });
 
-        // Other Navigation
-        document.getElementById('startAppBtn')?.addEventListener('click', () => Setup.startCameraFlow());
-        document.getElementById('showBackModalBtn')?.addEventListener('click', () => UI.showModal('backModal'));
-        document.getElementById('toggleOrientationBtn')?.addEventListener('click', () => Setup.toggleOrientation());
+        // Setup -> Camera
+        document.getElementById('startAppBtn')?.addEventListener('click', () => {
+            window.startCameraFlow();
+        });
+
+        // Modals
+        document.getElementById('showBackModalBtn')?.addEventListener('click', () => window.showBackModal());
+        document.getElementById('hideBackModalBtn')?.addEventListener('click', () => window.hideBackModal());
+        document.getElementById('confirmResetBtn')?.addEventListener('click', () => window.resetAndBack());
+
+        // UI Orientation
+        document.getElementById('toggleOrientationBtn')?.addEventListener('click', () => window.toggleOrientation());
     },
 
     bindCaptureActions() {
-        document.getElementById('snapBtn')?.addEventListener('click', () => Capture.start());
-        document.getElementById('retakeBtn')?.addEventListener('click', () => Capture.retake());
-        document.getElementById('keepBtn')?.addEventListener('click', () => Capture.keep());
-        document.getElementById('finishBtn')?.addEventListener('click', () => Capture.finish());
+        document.getElementById('snapBtn')?.addEventListener('click', () => window.startCapture());
+        document.getElementById('retakeBtn')?.addEventListener('click', () => window.retakePhoto());
+        document.getElementById('keepBtn')?.addEventListener('click', () => window.keepPhoto());
+        document.getElementById('finishBtn')?.addEventListener('click', () => {
+            if (window.handleContinue) window.handleContinue();
+            else Capture.finish();
+        });
     },
 
     bindSelectionLogic() {
@@ -47,7 +48,7 @@ export const Events = {
                 if (btn) {
                     const shots = parseInt(btn.dataset.shots);
                     this.updateActiveButton(shotGrid, btn);
-                    Setup.selectShots(shots);
+                    window.selectShots(shots, btn);
                 }
             });
         }
@@ -55,10 +56,10 @@ export const Events = {
 
     updateActiveButton(parent, activeBtn) {
         parent.querySelectorAll('.num-btn').forEach(b => {
-            b.classList.remove('btn-primary');
+            b.classList.remove('btn-primary', 'btn-active');
             b.classList.add('btn-outline');
         });
-        activeBtn.classList.add('btn-primary');
+        activeBtn.classList.add('btn-primary', 'btn-active');
         activeBtn.classList.remove('btn-outline');
     }
 };

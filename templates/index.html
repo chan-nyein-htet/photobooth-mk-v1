@@ -1,106 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Photobooth Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4/face_detection.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
+    {% include 'includes/components/header_tags.html' %} </head>
 <body class="bg-black text-white">
-    <div id="welcomeScreen" class="active-screen">
-        <div class="modal-box-custom">
-            <h1 class="text-5xl font-black text-primary mb-2 italic uppercase tracking-tighter">AI PHOTO</h1>
-            <p class="text-xs opacity-40 mb-10 tracking-widest uppercase">Premium Booth Experience</p>
-            <button id="startPaymentBtn" class="btn btn-primary w-full h-20 rounded-3xl font-black text-xl shadow-lg" onclick="window.startPaymentFlow()">START SESSION</button>
-        </div>
+
+    {% include 'includes/components/welcome.html' %}
+    {% include 'includes/components/payment.html' %}
+    {% include 'includes/components/setup.html' %}
+
+    <div class="app-shell hidden-element" id="mainApp">
+        {% include 'includes/components/sidebars.html' %}
+        {% include 'includes/components/viewport.html' %}
     </div>
 
-    <div id="paymentScreen" class="hidden-element">
-        <div class="modal-box-custom">
-            <h1 class="text-4xl font-black mb-2 tracking-tighter uppercase">Scan to Pay</h1>
-            <div class="bg-white p-4 rounded-3xl mb-6 mx-auto w-fit mt-4">
-                <img id="qrCode" src="/static/assets/payment_qr.png" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=PAY_NOW'">
-            </div>
-            <div class="bg-white/5 rounded-2xl p-4 mb-8 text-center">
-                <p class="text-[10px] opacity-50 uppercase font-bold">Order ID</p>
-                <p id="displayOrderID" class="text-2xl font-mono font-black text-primary tracking-widest">--------</p>
-            </div>
-            <div class="flex items-center justify-center gap-3 text-primary font-bold">
-                <span class="loading loading-ring loading-md"></span>
-                <span class="animate-pulse">WAITING FOR PAYMENT...</span>
-            </div>
-        </div>
-    </div>
-
-    <div id="setup" class="hidden-element">
-        <div class="modal-box-custom">
-            <h2 class="text-3xl font-black text-primary mb-8 italic uppercase tracking-tighter">Select Shots</h2>
-            <div class="grid grid-cols-3 gap-3 mb-10">
-                <button class="num-btn btn btn-outline border-white/10 rounded-2xl" onclick="window.selectShots(1, this)">1</button>
-                <button class="num-btn btn btn-outline border-white/10 rounded-2xl" onclick="window.selectShots(2, this)">2</button>
-                <button class="num-btn btn btn-outline border-white/10 rounded-2xl" onclick="window.selectShots(3, this)">3</button>
-                <button class="num-btn btn btn-outline border-white/10 rounded-2xl btn-active btn-primary" onclick="window.selectShots(4, this)">4</button>
-                <button class="num-btn btn btn-outline border-white/10 rounded-2xl" onclick="window.selectShots(5, this)">5</button>
-                <button class="num-btn btn btn-outline border-white/10 rounded-2xl" onclick="window.selectShots(6, this)">6</button>
-            </div>
-            <button id="startAppBtn" class="btn btn-primary w-full h-16 rounded-3xl font-black text-lg" onclick="window.startCameraFlow()">LET'S SHOOT</button>
-        </div>
-    </div>
-
-    <div class="app-shell" id="mainApp">
-        <aside class="sidebar-left">
-            <span class="text-[10px] font-black opacity-40 uppercase mb-4">Filters</span>
-            <div class="asset-grid" id="effectList"></div>
-            <p class="text-[10px] font-black opacity-40 uppercase mt-8 mb-4">Props</p>
-            <div class="asset-grid" id="stickerList"></div>
-        </aside>
-
-        <main class="viewport">
-            <div class="top-bar flex justify-between w-full max-w-lg mb-4 px-2">
-                <button class="btn btn-xs btn-outline rounded-lg" onclick="window.toggleOrientation()">
-                    <i class="fa-solid fa-rotate"></i> <span id="orientationText">PORTRAIT</span>
-                </button>
-                <button class="btn btn-xs btn-neutral rounded-lg px-4" onclick="window.showBackModal()">BACK</button>
-            </div>
-            <div class="vf-container mode-portrait" id="vfContainer">
-                <div id="countdown" class="absolute inset-0 z-50 flex items-center justify-center text-8xl font-black text-primary pointer-events-none" style="display:none;"></div>
-                <canvas id="liveCanvas" class="w-full h-full object-cover"></canvas>
-                <img id="previewImg" class="hidden-element w-full h-full object-cover">
-                <video id="video" autoplay playsinline muted class="hidden"></video>
-                <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-50">
-                    <button id="snapBtn" class="w-20 h-20 rounded-full border-8 border-white bg-warning" onclick="window.startCapture()"></button>
-                    <div id="postCaptureBtns" class="hidden-element flex gap-4">
-                        <button class="btn btn-circle btn-lg btn-error" onclick="window.retakePhoto()"><i class="fa-solid fa-x"></i></button>
-                        <button class="btn btn-circle btn-lg btn-primary" onclick="window.keepPhoto()"><i class="fa-solid fa-check"></i></button>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <aside class="sidebar-right">
-            <span class="text-[10px] font-black opacity-40 uppercase mb-4">Gallery</span>
-            <div id="photoGrid" class="gallery-grid grid grid-cols-2 gap-2 mb-4"></div>
-            <button id="finishBtn" onclick="window.handleContinue()" class="btn btn-primary btn-lg w-full rounded-2xl font-black uppercase hidden-element">Finish</button>
-        </aside>
-    </div>
-
-    <div id="backModal" class="fixed inset-0 z-[100000] bg-black/80 backdrop-blur-sm hidden-element flex items-center justify-center">
-        <div class="bg-[#111] p-8 rounded-[32px] text-center border border-white/10 w-80 shadow-2xl">
-            <p class="mb-6 font-bold">Reset Session?</p>
-            <div class="flex gap-2">
-                <button onclick="window.hideBackModal()" class="btn btn-sm flex-1">No</button>
-                <button onclick="window.resetAndBack()" class="btn btn-sm btn-error flex-1">Yes</button>
-            </div>
-        </div>
-    </div>
+    {% include 'includes/components/back_modal.html' %}
 
     <script type="module" src="{{ url_for('static', filename='js/app.js') }}?v={{ range(1, 9999) | random }}"></script>
 </body>
 </html>
+
