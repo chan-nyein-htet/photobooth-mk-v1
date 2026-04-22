@@ -1,73 +1,16 @@
-/* --- Global Reset (မင်းဆီကအတိုင်း) --- */
+@tailwind base; @tailwind components; @tailwind utilities;
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body {
-    margin: 0; font-family: ui-sans-serif, system-ui, sans-serif;
-    overflow: hidden; width: 100vw; height: 100vh; background: #000; color: #fff; touch-action: none;
-}
-
-/* --- Core Screen Logic (မင်းဆီကအတိုင်း) --- */
+body { margin: 0; background: #000; overflow: hidden; width: 100vw; height: 100vh; font-family: sans-serif; }
 .hidden-element { display: none !important; }
-#welcomeScreen, #paymentScreen, #setup {
-    position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 9000; background: #000;
-    display: none; align-items: center; justify-content: center;
-}
-#welcomeScreen:not(.hidden-element), #paymentScreen:not(.hidden-element), #setup:not(.hidden-element) {
-    display: flex !important;
-}
 
-#countdown {
-    display: none; position: absolute; inset: 0; z-index: 9999;
-    align-items: center; justify-content: center; pointer-events: none;
-}
-#countdown[style*="display: flex"] { display: flex !important; }
+.viewport { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+.vf-container { position: relative; background: #111; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; display: flex; align-items: center; justify-content: center; }
+.vf-container.mode-portrait { aspect-ratio: 3/4; height: 55vh; width: auto; }
+.vf-container.mode-landscape { aspect-ratio: 16/9; width: 85vw; height: auto; }
 
-.modal-box-custom {
-    background: #111; padding: 40px; border-radius: 40px;
-    border: 1px solid rgba(255,255,255,0.05); text-align: center;
-    width: 100%; max-width: 400px;
-}
-
-/* --- App Shell & Layout --- */
-.app-shell { display: none; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
-.app-shell:not(.hidden-element) { display: flex; }
-
-/* Camera Center ဖြစ်အောင် ဒီအပိုင်းကိုပဲ နည်းနည်းညှိထားတယ် */
-.viewport { 
-    flex: 1; display: flex; flex-direction: column; 
-    align-items: center; justify-content: center; 
-    padding: 10px; position: relative; gap: 15px;
-}
-
-.vf-container {
-    position: relative; background: #111; border-radius: 40px;
-    overflow: hidden; width: auto; transition: all 0.3s ease;
-    border: 1px solid rgba(255,255,255,0.1);
-}
-.vf-container.mode-portrait { aspect-ratio: 3/4; height: 60vh; }
-.vf-container.mode-landscape { aspect-ratio: 16/9; height: 50vh; }
-
-/* Sidebar တွေကို အောက်မှာ Gallery အနေနဲ့ သုံးမယ် */
-.sidebar-left, .sidebar-right { display: none !important; }
-
-/* Gallery Grid Styling */
-#sidebarPhotoGrid { 
-    display: flex; gap: 10px; overflow-x: auto; width: 100%; max-width: 400px; padding: 5px; 
-}
-.gallery-item-box { 
-    flex: 0 0 75px; aspect-ratio: 3/4; background: #1a1a1a; 
-    border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
-}
-.gallery-item-box img { width: 100%; height: 100%; object-fit: cover; }
-
-/* --- Mobile Responsive Override (အိမ်တိုင် တည့်တဲ့အပိုင်း) --- */
-@media (max-width: 800px) {
-    /* မင်းရဲ့ မူရင်း 38vh ကို ဖယ်ပြီး အလယ်ရောက်အောင် ညှိလိုက်တယ် */
-    .viewport { width: 100% !important; padding: 40px 10px 10px 10px !important; }
-    .top-bar { position: absolute; top: 15px; width: 95%; left: 2.5%; z-index: 20; }
-}
-
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+#liveCanvas, #previewImg { width: 100% !important; height: 100% !important; object-fit: cover; }
+.gallery-wrapper { width: 100%; max-width: 500px; margin-top: 20px; overflow: hidden; }
+#sidebarPhotoGrid { display: flex; gap: 12px; overflow-x: auto; padding: 10px; min-height: 110px; }
 .active-timer { background: white !important; color: black !important; }
-#backModal { z-index: 100000 !important; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
 

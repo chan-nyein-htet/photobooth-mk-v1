@@ -1,23 +1,44 @@
-<div id="setup" class="screen hidden-element flex flex-col items-center justify-center p-6 text-center h-full">
-    <div class="mb-10">
-        <h2 class="text-5xl font-black text-white mb-3 italic">READY?</h2>
-        <p class="text-white/50 uppercase tracking-[0.3em] text-[10px]">8 Shots Professional Session</p>
+<div id="setup" class="hidden-element fixed inset-0 z-[9000] bg-black flex flex-col items-center justify-center p-8 text-center overflow-hidden transition-all duration-500">
+    
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[300px] bg-primary/10 blur-[120px] pointer-events-none"></div>
+
+    <div class="mb-12 relative z-10">
+        <h2 class="text-7xl font-black text-white mb-4 italic tracking-tighter leading-none animate-in fade-in zoom-in duration-700">
+            READY?
+        </h2>
+        <div class="flex items-center justify-center gap-3">
+            <span class="h-px w-8 bg-white/20"></span>
+            <p class="text-white/60 uppercase tracking-[0.4em] text-[11px] font-bold">
+                8 Shots Professional Session
+            </p>
+            <span class="h-px w-8 bg-white/20"></span>
+        </div>
     </div>
 
-    <div class="w-full max-w-xs">
-        <button id="startAppBtn" class="btn btn-primary btn-xl w-full rounded-2xl font-black text-xl py-6 h-auto shadow-[0_20px_50px_rgba(255,255,255,0.1)] active:scale-95 transition-transform">
-            START SHOOTING
+    <div class="w-full max-w-sm relative z-10">
+        <button id="startAppBtn" 
+                class="group relative w-full rounded-[30px] bg-primary py-8 px-6 shadow-[0_20px_60px_rgba(255,255,255,0.1)] transition-all duration-300 hover:scale-[1.03] active:scale-95 flex items-center justify-center gap-4 overflow-hidden">
+            
+            <div class="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            
+            <span class="text-black font-black text-2xl uppercase tracking-tight relative z-10">
+                Start Shooting
+            </span>
+            
+            <i class="fa-solid fa-camera text-black text-xl relative z-10 group-hover:rotate-12 transition-transform"></i>
         </button>
     </div>
 
-    <div class="mt-16 flex gap-3 opacity-20">
-        <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-        <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-        <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-        <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-        <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-        <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-        <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-        <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+    <div class="mt-20 flex gap-4 opacity-30 relative z-10">
+        <div class="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-white/40"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-white/40"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-white/40"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-white/40"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-white/40"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-white/40"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-white/40"></div>
     </div>
+
 </div>
+

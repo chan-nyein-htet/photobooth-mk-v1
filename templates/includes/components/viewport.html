@@ -1,38 +1,39 @@
-<main class="viewport">
-    <div id="flashOverlay" class="fixed inset-0 bg-white z-[10000] opacity-0 pointer-events-none" style="transition: opacity 0.05s ease-out;"></div>
+<main class="viewport relative flex-1 flex flex-col items-center justify-center p-4 overflow-hidden bg-black">
+    <div id="flashOverlay" class="fixed inset-0 bg-white z-[10000] opacity-0 pointer-events-none transition-opacity duration-75"></div>
 
-    <div class="absolute top-6 left-0 right-0 flex justify-between items-center px-6 z-50">
-        <button id="toggleOrientationBtn" class="btn btn-xs btn-outline text-white border-white/20 bg-black/40 backdrop-blur-md rounded-lg">
-            <i class="fa-solid fa-rotate"></i> <span id="orientationText" class="ml-1 uppercase text-[10px]">Portrait</span>
+    <div class="absolute top-6 left-0 right-0 flex justify-between items-center px-6 z-[60]">
+        <button id="toggleOrientationBtn" class="flex items-center gap-2 px-4 py-2 bg-black/40 backdrop-blur-md border border-white/10 rounded-xl text-white active:scale-95 transition-all">
+            <i class="fa-solid fa-rotate text-xs"></i>
+            <span id="orientationText" class="uppercase text-[10px] font-bold tracking-widest">Portrait</span>
         </button>
-        <button id="finishBtn" class="btn btn-xs btn-primary hidden-element uppercase text-[10px]">Finish</button>
+        <button id="finishBtn" class="hidden-element px-6 py-2 bg-primary text-black rounded-xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">Finish Session</button>
     </div>
 
-    <div class="vf-container mode-portrait shadow-2xl" id="vfContainer">
-        <div id="countdown" class="text-9xl font-black text-primary shadow-text"></div>
+    <div id="vfContainer" class="vf-container mode-portrait relative bg-[#111] rounded-[40px] overflow-hidden border border-white/10 shadow-2xl transition-all duration-500 ease-in-out">
+        <div id="countdown" class="absolute inset-0 flex items-center justify-center z-[55] text-9xl font-black text-primary pointer-events-none"></div>
         <canvas id="liveCanvas" class="w-full h-full object-cover"></canvas>
-        <img id="previewImg" class="hidden-element w-full h-full object-cover">
+        <img id="previewImg" class="hidden-element absolute inset-0 w-full h-full object-cover">
         <video id="video" autoplay playsinline muted class="hidden"></video>
 
-        <div class="absolute bottom-6 left-0 right-0 z-50 flex flex-col items-center gap-4">
-            <div id="timerControls" class="flex gap-1 bg-black/60 p-1 rounded-xl backdrop-blur-xl border border-white/10">
-                <button class="timer-opt px-3 py-1.5 text-[10px] rounded-lg text-white/40 active-timer" data-sec="3">3s</button>
-                <button class="timer-opt px-3 py-1.5 text-[10px] rounded-lg text-white/40" data-sec="5">5s</button>
-                <button class="timer-opt px-3 py-1.5 text-[10px] rounded-lg text-white/40" data-sec="10">10s</button>
-                <button class="timer-opt px-3 py-1.5 text-[10px] rounded-lg text-white/40" data-sec="20">20s</button>
+        <div class="absolute bottom-8 left-0 right-0 z-50 flex flex-col items-center gap-6">
+            <div id="timerControls" class="flex p-1.5 bg-black/60 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-xl">
+                <button class="timer-opt px-4 py-2 text-[10px] font-bold rounded-xl text-white/40 uppercase active-timer" data-sec="3">3s</button>
+                <button class="timer-opt px-4 py-2 text-[10px] font-bold rounded-xl text-white/40 uppercase" data-sec="5">5s</button>
+                <button class="timer-opt px-4 py-2 text-[10px] font-bold rounded-xl text-white/40 uppercase" data-sec="10">10s</button>
+                <button class="timer-opt px-4 py-2 text-[10px] font-bold rounded-xl text-white/40 uppercase" data-sec="20">20s</button>
             </div>
-            <button id="snapBtn" class="w-16 h-16 rounded-full border-[4px] border-white/30 p-1 bg-transparent active:scale-95 transition-transform">
-                <div class="w-full h-full rounded-full bg-white shadow-inner"></div>
+            <button id="snapBtn" class="group relative w-20 h-20 flex items-center justify-center rounded-full border-4 border-white/20 p-1 bg-transparent active:scale-90 transition-all">
+                <div class="w-full h-full rounded-full bg-white"></div>
             </button>
-            <div id="postCaptureBtns" class="hidden-element flex gap-6">
-                <button id="retakeBtn" class="btn btn-circle btn-error shadow-lg"><i class="fa-solid fa-xmark"></i></button>
-                <button id="keepBtn" class="btn btn-circle btn-primary shadow-lg"><i class="fa-solid fa-check"></i></button>
+            <div id="postCaptureBtns" class="hidden-element flex gap-8">
+                <button id="retakeBtn" class="w-14 h-14 flex items-center justify-center bg-red-500 text-white rounded-full shadow-xl active:scale-90"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button id="keepBtn" class="w-14 h-14 flex items-center justify-center bg-primary text-black rounded-full shadow-xl active:scale-90"><i class="fa-solid fa-check text-xl"></i></button>
             </div>
         </div>
     </div>
 
     <div class="gallery-wrapper">
-        <div id="sidebarPhotoGrid" class="no-scrollbar"></div>
+        <div id="sidebarPhotoGrid" class="no-scrollbar scroll-smooth"></div>
     </div>
 </main>
 

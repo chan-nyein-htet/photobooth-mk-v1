@@ -1,8 +1,26 @@
-<div id="welcomeScreen" class="active-screen">
-    <div class="modal-box-custom">
-        <h1 class="text-5xl font-black text-primary mb-2 italic uppercase tracking-tighter">AI PHOTO</h1>
-        <p class="text-xs opacity-40 mb-10 tracking-widest uppercase">Premium Booth Experience</p>
-        <button id="startPaymentBtn" class="btn btn-primary w-full h-20 rounded-3xl font-black text-xl shadow-lg">START SESSION</button>
+<div id="welcomeScreen" class="active-screen fixed inset-0 z-[9000] bg-black flex flex-col items-center justify-center overflow-hidden transition-all duration-500">
+    
+    <div class="bg-[#111] p-12 rounded-[40px] border border-white/5 text-center w-full max-w-[420px] shadow-2xl backdrop-blur-sm">
+        
+        <h1 class="text-6xl font-black text-primary mb-2 italic uppercase tracking-tighter leading-none">
+            AI PHOTO
+        </h1>
+        
+        <p class="text-[10px] opacity-40 mb-12 tracking-[0.4em] uppercase font-medium">
+            Premium Booth Experience
+        </p>
+        
+        <button id="startPaymentBtn" 
+                class="group relative w-full h-24 bg-primary text-black rounded-[30px] font-black text-2xl tracking-tight overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-[0_20px_50px_rgba(255,255,255,0.05)]">
+            
+            <span class="relative z-10 uppercase">Start Session</span>
+            
+            <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+        </button>
+
     </div>
+
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+
 </div>
 

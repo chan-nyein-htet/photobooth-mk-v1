@@ -1,14 +1,27 @@
-<div id="paymentScreen" class="hidden-element">
-    <div class="modal-box-custom">
-        <h1 class="text-4xl font-black mb-2 uppercase">Scan to Pay</h1>
-        <div class="bg-white p-4 rounded-3xl mb-6 mx-auto w-fit mt-4">
-            <img id="qrCode" src="/static/assets/payment_qr.png">
+<div id="paymentScreen" class="hidden-element fixed inset-0 z-[9000] bg-black flex items-center justify-center p-6 transition-all duration-500">
+    
+    <div class="bg-[#111] p-12 rounded-[40px] border border-white/5 text-center w-full max-w-[420px] shadow-2xl relative overflow-hidden">
+        
+        <h1 class="text-4xl font-black mb-2 uppercase text-white tracking-tight">
+            Scan to Pay
+        </h1>
+        
+        <div class="bg-white p-6 rounded-[30px] mb-8 mx-auto w-fit mt-6 shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+            <img id="qrCode" src="/static/assets/payment_qr.png" class="w-60 h-60 object-contain aspect-square">
         </div>
-        <p id="displayOrderID" class="text-2xl font-mono font-black text-primary tracking-widest">--------</p>
-        <div class="flex items-center justify-center gap-3 text-primary font-bold mt-4">
+        
+        <div class="bg-white/5 py-4 rounded-2xl border border-white/5 mb-6">
+            <p class="text-[10px] text-white/30 uppercase tracking-[0.2em] mb-1">Order ID</p>
+            <p id="displayOrderID" class="text-2xl font-mono font-black text-primary tracking-widest uppercase">
+                --------
+            </p>
+        </div>
+        
+        <div class="flex items-center justify-center gap-4 text-primary font-bold">
             <span class="loading loading-ring loading-md"></span>
-            <span class="animate-pulse">WAITING...</span>
+            <span class="animate-pulse tracking-[0.15em] uppercase text-xs">Waiting for payment...</span>
         </div>
+
     </div>
 </div>
 

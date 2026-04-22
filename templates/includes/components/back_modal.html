@@ -1,9 +1,26 @@
-<div id="backModal" class="hidden-element fixed inset-0 z-[100000] bg-black/80 flex items-center justify-center">
-    <div class="bg-[#111] p-8 rounded-[32px] text-center border border-white/10 w-80">
-        <p class="mb-6 font-bold">Reset Session?</p>
-        <div class="flex gap-2">
-            <button id="hideBackModalBtn" class="btn btn-sm flex-1">No</button>
-            <button id="confirmResetBtn" class="btn btn-sm btn-error flex-1">Yes</button>
+<div id="backModal" class="hidden-element fixed inset-0 z-[100000] bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 transition-all duration-300">
+    
+    <div class="bg-[#111] p-10 rounded-[40px] text-center border border-white/5 w-full max-w-[320px] shadow-2xl scale-in-center">
+        
+        <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fa-solid fa-circle-exclamation text-red-500 text-2xl"></i>
+        </div>
+
+        <h3 class="text-xl font-black text-white mb-2 uppercase tracking-tight">Reset Session?</h3>
+        <p class="text-white/40 text-xs mb-8 leading-relaxed">
+            All captured photos will be cleared. This action cannot be undone.
+        </p>
+        
+        <div class="flex gap-3">
+            <button id="hideBackModalBtn" 
+                    class="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold text-xs uppercase tracking-widest transition-all active:scale-95">
+                No, Stay
+            </button>
+            
+            <button id="confirmResetBtn" 
+                    class="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest transition-all shadow-[0_10px_20px_rgba(239,68,68,0.2)] active:scale-95">
+                Yes, Reset
+            </button>
         </div>
     </div>
 </div>

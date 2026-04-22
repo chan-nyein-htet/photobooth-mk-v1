@@ -1,53 +1,51 @@
-import { Debug } from './modules/debug.js'; 
-Debug.init();                      
+import { Debug } from './modules/debug.js';
+Debug.init();
 
-import { Nav } from './modules/navigation.js';        
+import { Nav } from './modules/navigation.js';
 import { State } from './modules/state.js';
-import { Payment } from './modules/payment.js';       
+import { Payment } from './modules/payment.js';
 import { Camera } from './modules/camera.js';
-import { Stickers } from './modules/stickers.js';     
+import { Stickers } from './modules/stickers.js';
 import { Filters } from './modules/filters.js';
-import { Capture } from './modules/capture.js';       
+import { Capture } from './modules/capture.js';
 import { Setup } from './modules/setup.js';
-import { Events } from './modules/events.js'; // ✅ Events Module ကို Import လုပ်လိုက်ပြီ
+import { Events } from './modules/events.js';
 
 // --- Global Actions (Window Bindings) ---
-window.startPaymentFlow = Payment.startFlow.bind(Payment);
-window.startCapture     = Capture.start.bind(Capture);
-window.keepPhoto        = Capture.keep.bind(Capture);
-window.retakePhoto      = Capture.retake.bind(Capture);
-window.selectShots      = Setup.setShots.bind(Setup); 
-window.toggleOrientation = Setup.toggleOrientation.bind(Setup);                                             
+// Bindings တွေကို Error မတက်အောင် သေချာချိတ်မယ်
+window.startPaymentFlow = () => Payment.startFlow();
+window.startCapture     = () => Capture.start();
+window.keepPhoto        = () => Capture.keep();
+window.retakePhoto      = () => Capture.resetUI(); // 👈 retake အစား resetUI ကို ခေါ်ရမယ်
+window.selectShots      = (n, btn) => Setup.setShots(n, btn);
+window.toggleOrientation = () => Setup.toggleOrientation();
 
-window.startCameraFlow = async () => {                    
+window.startCameraFlow = async () => {
     Nav.showScreen('mainApp');
     Setup.initGallery();
-    const canvas = document.getElementById('liveCanvas');                                                       
+    const canvas = document.getElementById('liveCanvas');
+    
+    // Background မှာ Load လုပ်မယ်
     await Promise.all([Stickers.init(), Filters.init(canvas)]);
-    await Camera.start(document.getElementById('video'), canvas);
+    
+    const video = document.getElementById('video');
+    if (video && canvas) {
+        await Camera.start(video, canvas);
+    }
 };
 
 window.resetAndBack = () => {
     State.reset();
-    ['previewImg', 'postCaptureBtns', 'finishBtn'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.classList.add('hidden-element');
-    });
-    const snapBtn = document.getElementById('snapBtn');
-    if(snapBtn) snapBtn.style.display = 'block';
-    
-    document.getElementById('liveCanvas').classList.remove('hidden-element');
-    Nav.showScreen('setup');
-    Nav.hideModal('backModal');
+    location.reload(); // State တွေ အရှုပ်အထွေးမဖြစ်အောင် အသန့်ဆုံးနည်းလမ်း
 };
 
-window.showScreen = Nav.showScreen;
+window.showScreen = (id) => Nav.showScreen(id);
 window.showBackModal = () => Nav.showModal('backModal');
 window.hideBackModal = () => Nav.hideModal('backModal');
 
-// 🚀 အခုမှ ခလုတ်တွေ အသက်ဝင်မှာပါ
+// 🚀 App စတင်မယ်
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("⚙️ Initializing UI Events...");
+    console.log("⚙️ System booting...");
     Events.init();
 });
 
