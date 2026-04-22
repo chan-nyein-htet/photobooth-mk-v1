@@ -1,22 +1,38 @@
 <main class="viewport">
-    <div class="top-bar flex justify-between w-full max-w-lg mb-4 px-2">
-        <button id="toggleOrientationBtn" class="btn btn-xs btn-outline rounded-lg">
-            <i class="fa-solid fa-rotate"></i> <span id="orientationText">PORTRAIT</span>
+    <div id="flashOverlay" class="fixed inset-0 bg-white z-[10000] opacity-0 pointer-events-none" style="transition: opacity 0.05s ease-out;"></div>
+
+    <div class="absolute top-6 left-0 right-0 flex justify-between items-center px-6 z-50">
+        <button id="toggleOrientationBtn" class="btn btn-xs btn-outline text-white border-white/20 bg-black/40 backdrop-blur-md rounded-lg">
+            <i class="fa-solid fa-rotate"></i> <span id="orientationText" class="ml-1 uppercase text-[10px]">Portrait</span>
         </button>
-        <button id="showBackModalBtn" class="btn btn-xs btn-neutral rounded-lg px-4">BACK</button>
+        <button id="finishBtn" class="btn btn-xs btn-primary hidden-element uppercase text-[10px]">Finish</button>
     </div>
-    <div class="vf-container mode-portrait" id="vfContainer">
-        <div id="countdown" class="absolute inset-0 z-50 flex items-center justify-center text-8xl font-black text-primary pointer-events-none"></div>
+
+    <div class="vf-container mode-portrait shadow-2xl" id="vfContainer">
+        <div id="countdown" class="text-9xl font-black text-primary shadow-text"></div>
         <canvas id="liveCanvas" class="w-full h-full object-cover"></canvas>
         <img id="previewImg" class="hidden-element w-full h-full object-cover">
         <video id="video" autoplay playsinline muted class="hidden"></video>
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-50">
-            <button id="snapBtn" class="w-20 h-20 rounded-full border-8 border-white bg-warning"></button>
-            <div id="postCaptureBtns" class="hidden-element flex gap-4">
-                <button id="retakeBtn" class="btn btn-circle btn-lg btn-error"><i class="fa-solid fa-x"></i></button>
-                <button id="keepBtn" class="btn btn-circle btn-lg btn-primary"><i class="fa-solid fa-check"></i></button>
+
+        <div class="absolute bottom-6 left-0 right-0 z-50 flex flex-col items-center gap-4">
+            <div id="timerControls" class="flex gap-1 bg-black/60 p-1 rounded-xl backdrop-blur-xl border border-white/10">
+                <button class="timer-opt px-3 py-1.5 text-[10px] rounded-lg text-white/40 active-timer" data-sec="3">3s</button>
+                <button class="timer-opt px-3 py-1.5 text-[10px] rounded-lg text-white/40" data-sec="5">5s</button>
+                <button class="timer-opt px-3 py-1.5 text-[10px] rounded-lg text-white/40" data-sec="10">10s</button>
+                <button class="timer-opt px-3 py-1.5 text-[10px] rounded-lg text-white/40" data-sec="20">20s</button>
+            </div>
+            <button id="snapBtn" class="w-16 h-16 rounded-full border-[4px] border-white/30 p-1 bg-transparent active:scale-95 transition-transform">
+                <div class="w-full h-full rounded-full bg-white shadow-inner"></div>
+            </button>
+            <div id="postCaptureBtns" class="hidden-element flex gap-6">
+                <button id="retakeBtn" class="btn btn-circle btn-error shadow-lg"><i class="fa-solid fa-xmark"></i></button>
+                <button id="keepBtn" class="btn btn-circle btn-primary shadow-lg"><i class="fa-solid fa-check"></i></button>
             </div>
         </div>
+    </div>
+
+    <div class="gallery-wrapper">
+        <div id="sidebarPhotoGrid" class="no-scrollbar"></div>
     </div>
 </main>
 

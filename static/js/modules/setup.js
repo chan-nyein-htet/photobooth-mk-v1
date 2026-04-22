@@ -18,7 +18,8 @@ export const Setup = {
     },
 
     initGallery() {
-        const grid = document.getElementById('photoGrid');
+        // Sidebar ထဲက ID အသစ် sidebarPhotoGrid ကို သုံးထားတယ်
+        const grid = document.getElementById('sidebarPhotoGrid');
         if(!grid) return;
         grid.innerHTML = '';
         for (let i = 0; i < State.config.shotLimit; i++) {

@@ -1,42 +1,25 @@
-/* --- Global Reset --- */
+/* --- Global Reset (မင်းဆီကအတိုင်း) --- */
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
     margin: 0; font-family: ui-sans-serif, system-ui, sans-serif;
-    overflow: hidden; width: 100vw; height: 100vh;
-    background: #000; color: #fff; touch-action: none;
+    overflow: hidden; width: 100vw; height: 100vh; background: #000; color: #fff; touch-action: none;
 }
 
-/* --- Core Screen Logic --- */
+/* --- Core Screen Logic (မင်းဆီကအတိုင်း) --- */
 .hidden-element { display: none !important; }
-
-/* Screens: Welcome, Payment, Setup */
 #welcomeScreen, #paymentScreen, #setup {
-    position: fixed; inset: 0; width: 100vw; height: 100vh;
-    z-index: 9000; background: #000;
+    position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 9000; background: #000;
     display: none; align-items: center; justify-content: center;
 }
-
-#welcomeScreen:not(.hidden-element),
-#paymentScreen:not(.hidden-element),
-#setup:not(.hidden-element) {
+#welcomeScreen:not(.hidden-element), #paymentScreen:not(.hidden-element), #setup:not(.hidden-element) {
     display: flex !important;
 }
 
-/* 🕒 TIMER LOGIC: Pure CSS Controller */
 #countdown {
-    display: none; /* အစမှာ ဖျောက်ထားမယ် (HTML inline style မလိုတော့ဘူး) */
-    position: absolute;
-    inset: 0;
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
+    display: none; position: absolute; inset: 0; z-index: 9999;
+    align-items: center; justify-content: center; pointer-events: none;
 }
-
-/* JS က style.display = 'flex' လို့ ပေးလိုက်တာနဲ့ ဒါက အလုပ်လုပ်မယ် */
-#countdown[style*="display: flex"] {
-    display: flex !important;
-}
+#countdown[style*="display: flex"] { display: flex !important; }
 
 .modal-box-custom {
     background: #111; padding: 40px; border-radius: 40px;
@@ -45,41 +28,46 @@ body {
 }
 
 /* --- App Shell & Layout --- */
-.app-shell { display: none; height: 100vh; width: 100vw; overflow: hidden; flex-direction: row; }
+.app-shell { display: none; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
 .app-shell:not(.hidden-element) { display: flex; }
 
-.viewport { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: relative; }
+/* Camera Center ဖြစ်အောင် ဒီအပိုင်းကိုပဲ နည်းနည်းညှိထားတယ် */
+.viewport { 
+    flex: 1; display: flex; flex-direction: column; 
+    align-items: center; justify-content: center; 
+    padding: 10px; position: relative; gap: 15px;
+}
 
 .vf-container {
     position: relative; background: #111; border-radius: 40px;
-    overflow: hidden; width: 100%; transition: all 0.3s ease;
+    overflow: hidden; width: auto; transition: all 0.3s ease;
     border: 1px solid rgba(255,255,255,0.1);
 }
-.vf-container.mode-portrait { aspect-ratio: 9/16; max-height: 80vh; }
-.vf-container.mode-landscape { aspect-ratio: 16/9; max-height: 60vh; }
+.vf-container.mode-portrait { aspect-ratio: 3/4; height: 60vh; }
+.vf-container.mode-landscape { aspect-ratio: 16/9; height: 50vh; }
 
-.sidebar-left, .sidebar-right {
-    width: 250px; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px);
-    display: flex; flex-direction: column; padding: 20px; border: 1px solid rgba(255,255,255,0.05);
+/* Sidebar တွေကို အောက်မှာ Gallery အနေနဲ့ သုံးမယ် */
+.sidebar-left, .sidebar-right { display: none !important; }
+
+/* Gallery Grid Styling */
+#sidebarPhotoGrid { 
+    display: flex; gap: 10px; overflow-x: auto; width: 100%; max-width: 400px; padding: 5px; 
 }
-
-.asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.box {
-    aspect-ratio: 1/1; background: #1a1a1a; border-radius: 50%; border: 2px solid transparent;
-    display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; width: 100%;
+.gallery-item-box { 
+    flex: 0 0 75px; aspect-ratio: 3/4; background: #1a1a1a; 
+    border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
 }
-.box img { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 50%; }
+.gallery-item-box img { width: 100%; height: 100%; object-fit: cover; }
 
-/* --- Mobile Responsive Logic (Original) --- */
+/* --- Mobile Responsive Override (အိမ်တိုင် တည့်တဲ့အပိုင်း) --- */
 @media (max-width: 800px) {
-    .app-shell { flex-direction: column; height: 100vh; }
-    .viewport { width: 100% !important; order: 1; padding: 55px 10px 10px 10px; flex: 0 0 auto; z-index: 10; }
-    .vf-container.mode-portrait { max-height: 38vh !important; }
-    .vf-container.mode-landscape { max-height: 35vh !important; }
-    .sidebar-left, .sidebar-right { width: 100% !important; order: 2; flex: 1; overflow-y: auto; padding: 5px 12px; }
-    .asset-grid { display: flex; overflow-x: auto; gap: 10px; scrollbar-width: none; }
-    .box { width: 45px !important; height: 45px !important; flex-shrink: 0 !important; }
+    /* မင်းရဲ့ မူရင်း 38vh ကို ဖယ်ပြီး အလယ်ရောက်အောင် ညှိလိုက်တယ် */
+    .viewport { width: 100% !important; padding: 40px 10px 10px 10px !important; }
     .top-bar { position: absolute; top: 15px; width: 95%; left: 2.5%; z-index: 20; }
 }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.active-timer { background: white !important; color: black !important; }
 #backModal { z-index: 100000 !important; }
 
