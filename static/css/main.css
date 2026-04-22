@@ -2,7 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ⚠️ Colors ကို အပေါ်ဆုံး တင်ရမယ် */
+@import "./comp-colors.css";
 @import "./base.css";
-@import "./layout.css";
-@import "./components.css";
-
+@import "./comp-fonts.css";
+@import "./comp-bg.css";
+@import "./comp-buttons.css";
+@import "./layout-viewport.css";
+@import "./layout-welcome.css";
+@import "./layout-setup.css";
+@import "./layout-payment.css";

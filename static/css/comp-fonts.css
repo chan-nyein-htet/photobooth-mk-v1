@@ -1,0 +1,14 @@
+@layer components {
+    body {
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        color: var(--app-text) !important;
+    }
+    
+    .font-heavy {
+        font-weight: 900 !important;
+    }
+
+    #startPaymentBtn, #startAppBtn {
+        font-weight: 900 !important;
+    }
+}

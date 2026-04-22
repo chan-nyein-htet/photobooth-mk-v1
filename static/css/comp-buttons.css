@@ -1,0 +1,22 @@
+@layer components {
+    /* HTML ထဲက bg-primary ပါတဲ့ button တိုင်း ဒီ effect ဝင်သွားမယ် */
+    .bg-primary {
+        @apply relative overflow-hidden transition-all duration-500 active:scale-90 !important;
+        background: linear-gradient(90deg, #10B981, #34D399) !important;
+        box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
+    }
+    
+    .bg-primary::after {
+        content: '';
+        @apply absolute inset-0 bg-white/30 -translate-x-full skew-x-[35deg] transition-transform duration-700;
+    }
+    
+    .bg-primary:hover::after {
+        @apply translate-x-[200%];
+    }
+
+    .bg-primary:hover {
+        @apply shadow-[0_0_40px_rgba(16,185,129,0.4)];
+        filter: brightness(1.1);
+    }
+}

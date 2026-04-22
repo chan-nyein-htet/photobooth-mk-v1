@@ -1,0 +1,9 @@
+:root {
+    --primary: #10B981; /* Emerald/Mint Green */
+    --accent: #34D399;  /* Seafoam Green */
+}
+
+@layer base {
+    .text-primary { color: var(--primary) !important; }
+    .bg-primary { background: linear-gradient(135deg, var(--primary), var(--accent)) !important; }
+}

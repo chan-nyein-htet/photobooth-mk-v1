@@ -1,46 +1,18 @@
 @layer components {
-    /* Glass Effect */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 32px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    .bg-primary, #startPaymentBtn, #startAppBtn {
+        background: linear-gradient(135deg, #FFD700 0%, #FFB800 100%) !important;
+        color: #000 !important;
+        font-weight: 900 !important;
+        box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2) !important;
+        border: none !important;
     }
-
-    /* Buttons */
-    .btn-gold {
-        background: #FFD700;
-        color: #000;
-        font-weight: 900;
-        border-radius: 16px;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+    .vf-container {
+        border-radius: 48px !important;
+        border: 4px solid rgba(255, 255, 255, 0.05) !important;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.8) !important;
     }
-    .btn-gold:active { transform: scale(0.95); }
-    .btn-gold:hover { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
-
-    /* Screen Base */
-    .screen-bg {
-        width: 100vw;
-        height: 100vh;
-        background-color: #000;
-        position: relative;
-        overflow: hidden;
-    }
-
-    /* Glow Decor */
-    .bg-glow {
-        position: absolute;
-        width: 300px;
-        height: 300px;
-        background: rgba(255, 215, 0, 0.05);
-        filter: blur(80px);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 0;
+    .active-timer {
+        background: #FFD700 !important;
+        color: #000 !important;
     }
 }
-
