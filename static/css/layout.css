@@ -1,0 +1,39 @@
+@layer components {
+    .viewport {
+        width: 100vw; height: 100vh;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        position: relative;
+    }
+
+    .vf-container {
+        position: relative; 
+        background: #111; 
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        border-radius: 40px;
+    }
+
+    .vf-container.mode-portrait { aspect-ratio: 3/4; height: 55vh; width: auto; }
+    .vf-container.mode-landscape { aspect-ratio: 16/9; width: 85vw; height: auto; }
+
+    .gallery-wrapper {
+        width: 100%; 
+        max-width: 500px;
+        margin-top: 20px; 
+        overflow: hidden;
+    }
+
+    #sidebarPhotoGrid {
+        display: flex; 
+        gap: 12px; 
+        overflow-x: auto;
+        padding: 10px; 
+        min-height: 110px;
+    }
+}
+
