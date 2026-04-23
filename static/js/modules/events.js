@@ -2,18 +2,34 @@ import { Setup } from './setup.js';
 import { Capture } from './capture.js';
 import { UI } from './ui.js';
 import { State } from './state.js';
+import { Nav } from './navigation.js';
 
 export const Events = {
     init() {
-        console.log("⚙️ UI Events Module Loaded (8 Shots Mode)");
+        console.log("⚙️ UI Events Module Loaded");
         this.bindCoreFlows();
         this.bindCaptureActions();
         this.bindTimerActions();
     },
 
     bindCoreFlows() {
+        // Welcome -> Collage Selection
         document.getElementById('startPaymentBtn')?.addEventListener('click', () => {
-            window.startPaymentFlow();
+            Nav.showScreen('collageSelect');
+        });
+
+        // Layout Selection (Double call ရှောင်ရန် simple listener သုံးမယ်)
+        const layoutBtns = document.querySelectorAll('.layout-card-btn');
+        layoutBtns.forEach(btn => {
+            btn.onclick = () => {
+                const layout = btn.dataset.layout;
+                const shots = btn.dataset.shots;
+                import('./collage.js').then(m => m.Collage.select(layout, shots));
+            };
+        });
+
+        document.getElementById('backToWelcomeBtn')?.addEventListener('click', () => {
+            Nav.showScreen('welcomeScreen');
         });
 
         document.getElementById('startAppBtn')?.addEventListener('click', () => {
@@ -46,3 +62,4 @@ export const Events = {
         });
     }
 };
+

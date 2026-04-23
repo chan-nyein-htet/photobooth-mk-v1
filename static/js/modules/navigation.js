@@ -1,6 +1,7 @@
 export const Nav = {
     showScreen: (screenId) => {
-        ['welcomeScreen', 'paymentScreen', 'setup', 'mainApp'].forEach(id => {
+        // 'collageSelect' ကို စာရင်းထဲ ထည့်လိုက်တယ်
+        ['welcomeScreen', 'collageSelect', 'paymentScreen', 'setup', 'mainApp'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 el.classList.add('hidden-element');

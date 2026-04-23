@@ -1,6 +1,6 @@
 export const State = {
     config: {
-        shotLimit: 8, // ၈ ပုံ ပြန်ပြောင်းလိုက်ပြီ
+        shotLimit: 8,
         orientation: 'portrait',
         timerValue: 3
     },
@@ -8,7 +8,9 @@ export const State = {
         currentShot: 0,
         orderId: null,
         tempImgData: null,
-        isPaid: false
+        capturedImages: [], // ✅ ကြိုတင် သတ်မှတ်ထားမယ်
+        isPaid: false,
+        layoutId: 'A+'
     },
     assets: {
         activeStickerImg: null,
@@ -17,6 +19,7 @@ export const State = {
     reset() {
         this.session.currentShot = 0;
         this.session.tempImgData = null;
+        this.session.capturedImages = []; // ✅ Reset လုပ်ရင် ပုံတွေပါ ရှင်းမယ်
         this.assets.activeStickerImg = null;
         this.assets.currentFilterStr = 'none';
         console.log("♻️ State Reset: 8 Shots Mode Activated");
