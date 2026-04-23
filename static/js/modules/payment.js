@@ -1,53 +1,58 @@
 import { State } from './state.js';
-import { Nav } from './navigation.js';
+import { Nav } from './navigation.js';                
 
 export const Payment = {
-    // ပင်မ flow စတင်ခြင်း
-    async startFlow() {
-        // ၁။ UI ကို Payment screen ပြောင်းမယ်
-        Nav.showScreen('paymentScreen');
+    itv: null, // Interval ကို သိမ်းဖို့
 
-        // ၂။ Order ID ယူမယ်
-        const orderId = State.session.order_id;
+    async startFlow() {
+        console.log("💳 Starting Payment Flow...");
+        Nav.showScreen('paymentScreen');              
+        
+        // 🎯 State ထဲက နာမည်မှန် (orderId) နဲ့ ပြန်ခေါ်မယ်
+        const orderId = State.session.orderId;
 
         if (orderId) {
             // UI မှာ Order ID ပြမယ်
-            const displayEl = document.getElementById('displayOrderID');
-            if (displayEl) displayEl.innerText = orderId;
-
+            const displayEl = document.getElementById('displayOrderID');                                                
+            if (displayEl) displayEl.innerText = orderId;                                                   
+            
             // QR Code ထုတ်မယ်
             const baseUrl = this.getBaseUrl();
             const paymentLink = `${baseUrl}/api/pay/${orderId}`;
-            const qrEl = document.getElementById('qrCode');
+            const qrEl = document.getElementById('qrCode');                                                             
             if (qrEl) {
-                qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(paymentLink)}`;
+                qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(paymentLink)}`;                                                
             }
 
             // ၃။ ပိုက်ဆံချေမချေ စစ်မယ်
             this.startPolling(() => {
-                console.log("✅ Payment Success! Switching to Setup...");
+                console.log("✅ Payment Success! Switching to Camera Flow...");
                 
-                // ✅ မင်းရဲ့ HTML ID အတိုင်း 'setup' လို့ပဲ ပြန်ပြောင်းပေးထားတယ် (Design မပျက်စေရဘူး)
-                Nav.showScreen('setup'); 
+                // 🎯 ဒီနေရာမှာ မင်းရဲ့ Camera Flow စတင်တဲ့ function ကို တိုက်ရိုက်ခေါ်ပေးရမယ်
+                if (window.startCameraFlow) {
+                    window.startCameraFlow();
+                } else {
+                    // Fallback အနေနဲ့ screen ပဲ ပြောင်းမယ်
+                    Nav.showScreen('mainApp');
+                }
             });
         } else {
-            console.error("❌ No Order ID found in State!");
+            console.error("❌ No Order ID found in State! (Check if Collage.select saved it correctly)");
         }
     },
 
-    // Backend status ကို ၂ စက္ကန့်တစ်ခါ လှမ်းမေးခြင်း
     startPolling(onSuccess) {
         if (this.itv) clearInterval(this.itv);
 
         this.itv = setInterval(async () => {
-            const orderId = State.session.order_id;
+            // 🎯 နာမည်မှန် orderId နဲ့ပဲ စစ်မယ်
+            const orderId = State.session.orderId;
             if (!orderId) return;
 
             try {
                 const r = await fetch(`/api/check_payment/${orderId}`);
                 const d = await r.json();
 
-                // Backend ရဲ့ response နဲ့ တိုက်စစ်မယ်
                 if (d.status === 'success' && d.paid === true) {
                     clearInterval(this.itv);
                     State.session.isPaid = true;
@@ -65,6 +70,5 @@ export const Payment = {
     }
 };
 
-// Global function
 window.startPaymentFlow = () => Payment.startFlow();
 

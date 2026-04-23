@@ -1,0 +1,40 @@
+<section id="photoEditorView" class="hidden-element fixed inset-0 z-[100] bg-[#050505] flex flex-col items-center justify-center">
+    
+    <div class="absolute top-6 left-0 right-0 px-8 flex justify-between items-center">
+        <div class="flex flex-col">
+            <h2 class="text-white font-black italic tracking-tighter text-2xl uppercase">Creative Studio</h2>
+            <p class="text-primary text-[10px] font-bold tracking-[0.3em] uppercase">Drag, Drop & Personalize</p>
+        </div>
+        
+        <button id="saveEditBtn" class="bg-primary px-10 py-3 rounded-full font-black text-black uppercase active:scale-95 transition-all shadow-[0_0_40px_rgba(16,185,129,0.3)]">
+            Finalize & Print
+        </button>
+    </div>
+
+    <div class="flex gap-6 items-center justify-center w-full max-w-[95vw] h-[75vh]">
+        
+        <div class="apple-glass p-5 w-56 h-full flex flex-col gap-4">
+            <h3 class="text-white/40 text-[10px] font-black uppercase tracking-widest text-center border-b border-white/10 pb-3">Stickers</h3>
+            <div id="stickerTray" class="flex flex-col gap-4 overflow-y-auto no-scrollbar pr-1">
+                <div class="sticker-item" data-sticker="heart">❤️</div>
+                <div class="sticker-item" data-sticker="star">⭐</div>
+                <div class="sticker-item" data-sticker="crown">👑</div>
+            </div>
+        </div>
+
+        <div class="relative bg-black/40 rounded-[40px] p-6 shadow-2xl border border-white/5 backdrop-blur-3xl overflow-hidden flex items-center justify-center h-full flex-1">
+             <canvas id="editorCanvas"></canvas>
+        </div>
+
+        <div class="apple-glass p-5 w-56 h-full flex flex-col gap-4">
+            <h3 class="text-white/40 text-[10px] font-black uppercase tracking-widest text-center border-b border-white/10 pb-3">Filters</h3>
+            <div id="filterTray" class="flex flex-col gap-3 overflow-y-auto no-scrollbar pr-1">
+                <button class="filter-btn bg-white/5 p-3 rounded-xl text-white text-[10px] font-bold uppercase hover:bg-primary hover:text-black transition-all">Original</button>
+                <button class="filter-btn bg-white/5 p-3 rounded-xl text-white text-[10px] font-bold uppercase hover:bg-primary hover:text-black transition-all">B&W</button>
+                <button class="filter-btn bg-white/5 p-3 rounded-xl text-white text-[10px] font-bold uppercase hover:bg-primary hover:text-black transition-all">Vintage</button>
+            </div>
+        </div>
+
+    </div>
+</section>
+

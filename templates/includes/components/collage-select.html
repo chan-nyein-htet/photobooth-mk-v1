@@ -1,21 +1,20 @@
 {% macro render_layout_card(l_id, l_type, l_conf, l_shots) %}
     <div class="layout-card-btn group cursor-pointer"
-         onclick="window.selectCollage('{{ l_id|string }}', {{ l_shots|int }})">
+         onclick="window.selectCollage('{{ l_id }}', '{{ l_type }}', {{ l_shots }})">
 
-        <div class="apple-glass p-5 w-full h-auto flex flex-col items-center border border-white/10 rounded-[24px] hover:border-primary/50 transition-all">
-
-            <div class="layout-preview-box w-full max-h-[18vh] shadow-2xl flex items-center justify-center overflow-hidden"
+        <div class="apple-glass p-3 w-full h-auto flex flex-col items-center border border-white/10 rounded-[24px] hover:border-primary/50 transition-all bg-white/5">
+            <div class="layout-preview-box w-full relative shadow-2xl flex items-center justify-center overflow-hidden rounded-lg bg-black/20"
                  style="aspect-ratio: {{ l_conf.width }} / {{ l_conf.height }};">
+                
+                <img src="/static/templates/{{ l_type }}/{{ l_id }}.png"
+                     class="w-full h-full object-contain p-1 transition-transform group-hover:scale-105">
 
-                <div class="flex {{ 'flex-col' if l_type == '6x2' else 'grid grid-cols-2' }} gap-1.5 p-2 h-full w-full">
-                    {% for i in range(l_shots) %}
-                        <div class="bg-white/20 w-full h-full rounded-sm"></div>
-                    {% endfor %}
+                <div class="absolute top-2 right-2 bg-primary/80 text-black text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                    {{ l_shots }} Shots
                 </div>
             </div>
-
-            <div class="text-center mt-4">
-                <span class="text-lg font-black text-white block uppercase italic leading-none">Layout {{ l_id }}</span>
+            <div class="text-center mt-3">
+                <span class="text-[10px] font-mono text-white/40 block uppercase tracking-tighter">Layout: #{{ l_id[-4:] }}</span>
             </div>
         </div>
     </div>
@@ -25,41 +24,24 @@
     <div class="absolute inset-0 bg-black/40 -z-10"></div>
     <div class="relative w-full max-w-6xl overflow-y-auto max-h-[90vh] p-6 custom-scrollbar flex flex-col gap-10">
 
-        <div class="text-center mb-2">
-            <h2 class="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter shadow-sm">
-                Select <span class="text-primary">Layout</span>
-            </h2>
-            <p class="text-white/30 text-[10px] font-mono tracking-[0.5em] uppercase mt-2">Choose your preferred photo style</p>
+        <div class="text-center">
+            <h2 class="text-3xl font-black text-white uppercase italic tracking-tighter">Select <span class="text-primary">Layout</span></h2>
         </div>
 
         <div class="w-full flex flex-col gap-4">
-            <div class="flex items-center gap-4">
-                <h3 class="text-white/40 text-xs font-mono tracking-[0.3em] uppercase whitespace-nowrap">Classic Strips (6x2)</h3>
-                <div class="h-[1px] w-full bg-white/10"></div>
-            </div>
+            <h3 class="text-white/40 text-xs font-mono uppercase tracking-[0.3em]">Classic Strips (6x2)</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {% for id in ['A', 'B', 'C', 'D'] %}
-                    {% if id in allowed_layouts %}
-                        {% set conf = canvas_configs["6x2"] %}
-                        {% set shots = 3 if id in ['A','B'] else 4 %}
-                        {{ render_layout_card(id, "6x2", conf, shots) }}
-                    {% endif %}
+                {% for id in active_layouts['6x2'] %}
+                    {{ render_layout_card(id, "6x2", canvas_configs["6x2"], 3) }}
                 {% endfor %}
             </div>
         </div>
 
         <div class="w-full flex flex-col gap-4">
-            <div class="flex items-center gap-4">
-                <h3 class="text-white/40 text-xs font-mono tracking-[0.3em] uppercase whitespace-nowrap">Modern Landscape (6x4)</h3>
-                <div class="h-[1px] w-full bg-white/10"></div>
-            </div>
+            <h3 class="text-white/40 text-xs font-mono uppercase tracking-[0.3em]">Modern Landscape (6x4)</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {% for id in ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] %}
-                    {% if id in allowed_layouts %}
-                        {% set conf = canvas_configs["6x4"] %}
-                        {% set shots = 4 if id == 'E' else (2 if id in ['F','G','H'] else 3) %}
-                        {{ render_layout_card(id, "6x4", conf, shots) }}
-                    {% endif %}
+                {% for id in active_layouts['6x4'] %}
+                    {{ render_layout_card(id, "6x4", canvas_configs["6x4"], 4) }}
                 {% endfor %}
             </div>
         </div>

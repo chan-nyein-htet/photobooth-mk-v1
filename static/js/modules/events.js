@@ -3,6 +3,7 @@ import { Capture } from './capture.js';
 import { UI } from './ui.js';
 import { State } from './state.js';
 import { Nav } from './navigation.js';
+import { Editor } from './editor.js';
 
 export const Events = {
     init() {
@@ -13,13 +14,9 @@ export const Events = {
     },
 
     bindCoreFlows() {
-        // Welcome -> Collage Selection
         document.getElementById('startPaymentBtn')?.addEventListener('click', () => {
             Nav.showScreen('collageSelect');
         });
-
-        // 🎯 အရေးကြီး: layout-card-btn listener တွေကို ဒီမှာ လုံးဝမထားရပါ
-        // HTML ထဲက window.selectCollage ကပဲ အကုန်လုပ်ပါလိမ့်မယ်
 
         document.getElementById('backToWelcomeBtn')?.addEventListener('click', () => {
             Nav.showScreen('welcomeScreen');
@@ -47,7 +44,23 @@ export const Events = {
     bindCaptureActions() {
         document.getElementById('snapBtn')?.addEventListener('click', () => window.startCapture());
         document.getElementById('retakeBtn')?.addEventListener('click', () => window.retakePhoto());
-        document.getElementById('keepBtn')?.addEventListener('click', () => window.keepPhoto());
+
+        document.getElementById('keepBtn')?.addEventListener('click', () => {
+            window.keepPhoto();
+
+            // 🎯 Shot Limit ပြည့်မပြည့် စစ်မယ်
+            if (State.session.capturedImages.length >= State.config.shotLimit) {
+                console.log("📸 Shot Limit Reached! Switching to Editor...");
+
+                Nav.showScreen('photoEditorView');
+
+                // 🎯 ဓာတ်ပုံ ၈ ပုံ render ဖြစ်ချိန် ခဏစောင့်ပြီးမှ Editor ကို နှိုးမယ်
+                setTimeout(() => {
+                    Editor.init();
+                    Editor.loadProject();
+                }, 100);
+            }
+        });
 
         document.getElementById('finishBtn')?.addEventListener('click', () => {
             if (window.handleContinue) window.handleContinue();

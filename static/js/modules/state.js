@@ -8,9 +8,11 @@ export const State = {
         currentShot: 0,
         orderId: null,
         tempImgData: null,
-        capturedImages: [], // ✅ ကြိုတင် သတ်မှတ်ထားမယ်
+        capturedImages: [],
         isPaid: false,
-        layoutId: 'A+'
+        layoutId: null,
+        paperSize: '6x2',
+        totalShots: 3
     },
     assets: {
         activeStickerImg: null,
@@ -18,11 +20,15 @@ export const State = {
     },
     reset() {
         this.session.currentShot = 0;
+        this.session.orderId = null;
         this.session.tempImgData = null;
-        this.session.capturedImages = []; // ✅ Reset လုပ်ရင် ပုံတွေပါ ရှင်းမယ်
+        this.session.capturedImages = [];
+        this.session.layoutId = null;
+        this.session.paperSize = '6x2';
         this.assets.activeStickerImg = null;
         this.assets.currentFilterStr = 'none';
-        console.log("♻️ State Reset: 8 Shots Mode Activated");
+        console.log("♻️ State Reset: Cleared for next session");
     }
 };
+// 🎯 ဒီထဲက window.selectCollage ကို ဖြုတ်လိုက်ပြီ (Collage.js မှာပဲ ထားမယ်)
 

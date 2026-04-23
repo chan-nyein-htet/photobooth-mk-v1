@@ -1,0 +1,43 @@
+/* static/css/layout-editor.css */
+
+@layer components {
+    #photoEditorView {
+        /* Background ကို နက်မှောင်ပြီး အလယ်မှာ အလင်းစူးတဲ့ပုံစံ (Radial Gradient) လုပ်မယ် */
+        background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+        transition: all 0.5s ease-in-out;
+    }
+
+    /* Fabric.js Canvas အတွက် Container */
+    .canvas-container {
+        margin: 0 auto;
+        box-shadow: 0 0 80px rgba(0, 0, 0, 0.8), 0 0 20px rgba(16, 185, 129, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    /* Sticker Sidebar ထဲက Sticker တစ်ခုချင်းစီရဲ့ Design */
+    .sticker-item {
+        @apply w-full aspect-square bg-white/5 rounded-2xl border border-white/10 
+               flex items-center justify-center text-3xl cursor-pointer 
+               hover:bg-primary/20 hover:border-primary/50 hover:scale-105 
+               transition-all duration-300;
+    }
+
+    /* Filter ခလုတ်တွေအတွက် Custom Style */
+    .filter-btn {
+        @apply w-full py-4 px-4 bg-white/5 rounded-2xl border border-white/5 
+               text-white/60 text-[10px] font-black uppercase tracking-widest 
+               hover:bg-primary hover:text-black hover:border-primary 
+               transition-all duration-300;
+    }
+
+    /* Scrollbar ကို ဖျောက်ထားမယ် (မင်းရဲ့ Style အတိုင်း) */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}
+
