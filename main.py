@@ -2,13 +2,12 @@ import socket
 import os
 from flask import Flask, render_template
 from app.api.photo_api import photo_bp
+from app.core.config import Settings  # ✅ Settings class ကို ခေါ်ယူခြင်း
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
-# ✅ Blueprint ကို register လုပ်တဲ့နေရာမှာ url_prefix='/api' ထည့်လိုက်ပြီ
-# ဒါဆိုရင် photo_api.py ထဲက route တွေကို လှမ်းခေါ်ရင် /api/... နဲ့ ခေါ်ရမယ်
-# ဥပမာ - photo_api ထဲမှာ /create_order လို့ရေးထားရင် ဒီမှာ /api/create_order ဖြစ်သွားမယ်
+# ✅ Blueprint Register (API Routes)
 app.register_blueprint(photo_bp, url_prefix='/api')
 
 def get_local_ip():
@@ -24,10 +23,19 @@ def get_local_ip():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # ✅ (၁) Settings ထဲကနေ လက်ရှိ Printer mode နဲ့ ကိုက်ညီတဲ့ Layout list ကို ယူမယ်
+    allowed_layouts = Settings.get_allowed_layouts()
 
-# ✅ အနာဂတ်မှာ Dashboard route တွေထည့်ချင်ရင် ဒီအောက်မှာ Blueprint သီးသန့်ထပ်တိုးရုံပဲ
-# ဥပမာ - app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
+    # ✅ (၂) JSON ထဲက Canvas Size Config တွေကိုပါ ဆွဲထုတ်မယ်
+    all_settings = Settings.load()
+    canvas_configs = all_settings.get('canvas_configs', {})
+
+    # ✅ (၃) Layouts ရော Canvas Sizes ရော index.html ဆီ ပို့ပေးလိုက်မယ်
+    return render_template(
+        'index.html', 
+        allowed_layouts=allowed_layouts, 
+        canvas_configs=canvas_configs
+    )
 
 if __name__ == '__main__':
     # Upload folder မရှိရင် ဆောက်မယ်

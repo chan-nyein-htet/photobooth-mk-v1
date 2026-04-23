@@ -1,44 +1,68 @@
-<section id="collageSelect" class="viewport p-10 flex flex-col items-center justify-center hidden-element">
-    <div class="collage-header text-center mb-12">
-        <h2 class="text-5xl font-extrabold text-white mb-4 tracking-tight uppercase italic">Select Style</h2>
-        <div class="h-1 w-24 bg-primary mx-auto rounded-full"></div>
-    </div>
+{% macro render_layout_card(l_id, l_type, l_conf, l_shots) %}
+    <div class="layout-card-btn group cursor-pointer"
+         onclick="window.selectCollage('{{ l_id|string }}', {{ l_shots|int }})">
 
-    <div class="collage-grid-wrapper flex gap-10 w-full max-w-6xl justify-center">
-        
-        <div id="layout-aplus" class="layout-card-btn group cursor-pointer" data-layout="A+" data-shots="3">
-            <div class="apple-glass p-6">
-                <div class="preview-box preview-aplus">
-                    <div class="preview-slot"></div>
-                    <div class="preview-slot"></div>
-                    <div class="preview-slot"></div>
+        <div class="apple-glass p-5 w-full h-auto flex flex-col items-center border border-white/10 rounded-[24px] hover:border-primary/50 transition-all">
+
+            <div class="layout-preview-box w-full max-h-[18vh] shadow-2xl flex items-center justify-center overflow-hidden"
+                 style="aspect-ratio: {{ l_conf.width }} / {{ l_conf.height }};">
+
+                <div class="flex {{ 'flex-col' if l_type == '6x2' else 'grid grid-cols-2' }} gap-1.5 p-2 h-full w-full">
+                    {% for i in range(l_shots) %}
+                        <div class="bg-white/20 w-full h-full rounded-sm"></div>
+                    {% endfor %}
                 </div>
-                <div class="layout-meta mt-6">
-                    <span class="text-2xl font-bold text-white block">LAYOUT A+</span>
-                    <span class="text-white/40 text-sm font-mono uppercase tracking-widest">3 Dynamic Shots</span>
-                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <span class="text-lg font-black text-white block uppercase italic leading-none">Layout {{ l_id }}</span>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+<section id="collageSelect" class="fixed inset-0 z-[60] w-full h-full flex items-center justify-center p-4 hidden-element overflow-hidden app-dynamic-bg">
+    <div class="absolute inset-0 bg-black/40 -z-10"></div>
+    <div class="relative w-full max-w-6xl overflow-y-auto max-h-[90vh] p-6 custom-scrollbar flex flex-col gap-10">
+
+        <div class="text-center mb-2">
+            <h2 class="text-3xl md:text-5xl font-black text-white uppercase italic tracking-tighter shadow-sm">
+                Select <span class="text-primary">Layout</span>
+            </h2>
+            <p class="text-white/30 text-[10px] font-mono tracking-[0.5em] uppercase mt-2">Choose your preferred photo style</p>
+        </div>
+
+        <div class="w-full flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+                <h3 class="text-white/40 text-xs font-mono tracking-[0.3em] uppercase whitespace-nowrap">Classic Strips (6x2)</h3>
+                <div class="h-[1px] w-full bg-white/10"></div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {% for id in ['A', 'B', 'C', 'D'] %}
+                    {% if id in allowed_layouts %}
+                        {% set conf = canvas_configs["6x2"] %}
+                        {% set shots = 3 if id in ['A','B'] else 4 %}
+                        {{ render_layout_card(id, "6x2", conf, shots) }}
+                    {% endif %}
+                {% endfor %}
             </div>
         </div>
 
-        <div id="layout-b" class="layout-card-btn group cursor-pointer" data-layout="B" data-shots="4">
-            <div class="apple-glass p-6">
-                <div class="preview-box preview-b">
-                    <div class="preview-slot"></div>
-                    <div class="preview-slot"></div>
-                    <div class="preview-slot"></div>
-                    <div class="preview-slot"></div>
-                </div>
-                <div class="layout-meta mt-6">
-                    <span class="text-2xl font-bold text-white block">LAYOUT B</span>
-                    <span class="text-white/40 text-sm font-mono uppercase tracking-widest">4 Classic Shots</span>
-                </div>
+        <div class="w-full flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+                <h3 class="text-white/40 text-xs font-mono tracking-[0.3em] uppercase whitespace-nowrap">Modern Landscape (6x4)</h3>
+                <div class="h-[1px] w-full bg-white/10"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {% for id in ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] %}
+                    {% if id in allowed_layouts %}
+                        {% set conf = canvas_configs["6x4"] %}
+                        {% set shots = 4 if id == 'E' else (2 if id in ['F','G','H'] else 3) %}
+                        {{ render_layout_card(id, "6x4", conf, shots) }}
+                    {% endif %}
+                {% endfor %}
             </div>
         </div>
-
     </div>
-
-    <button id="backToWelcomeBtn" class="mt-16 text-white/30 hover:text-primary transition-all duration-300 font-mono tracking-widest uppercase">
-        [ ESCAPE TO HOME ]
-    </button>
 </section>
 

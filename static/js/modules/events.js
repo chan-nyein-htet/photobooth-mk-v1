@@ -18,15 +18,8 @@ export const Events = {
             Nav.showScreen('collageSelect');
         });
 
-        // Layout Selection (Double call ရှောင်ရန် simple listener သုံးမယ်)
-        const layoutBtns = document.querySelectorAll('.layout-card-btn');
-        layoutBtns.forEach(btn => {
-            btn.onclick = () => {
-                const layout = btn.dataset.layout;
-                const shots = btn.dataset.shots;
-                import('./collage.js').then(m => m.Collage.select(layout, shots));
-            };
-        });
+        // 🎯 အရေးကြီး: layout-card-btn listener တွေကို ဒီမှာ လုံးဝမထားရပါ
+        // HTML ထဲက window.selectCollage ကပဲ အကုန်လုပ်ပါလိမ့်မယ်
 
         document.getElementById('backToWelcomeBtn')?.addEventListener('click', () => {
             Nav.showScreen('welcomeScreen');

@@ -1,0 +1,68 @@
+/**
+ * 🎨 Layout & Canvas Base
+ */
+:root {
+    --canvas-w: 600px;
+    --canvas-h: 1800px;
+}
+
+.hidden-element { display: none !important; }
+
+#collageSelect {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/**
+ * 🃏 Layout Selection Cards (Frozen Fix)
+ */
+
+/* 🎯 6x2 Strips Size (4-column layout နဲ့ ညီအောင်) */
+.grid-cols-2.md\:grid-cols-4 .layout-card-btn .apple-glass {
+    width: 155px !important;
+    margin: 0 auto;
+}
+
+/* 🎯 6x4 Modern Size (6x2 နှစ်ခုစာနဲ့ အကျယ်ညီအောင် lock ချတာ) */
+.grid-cols-1.md\:grid-cols-2 .layout-card-btn .apple-glass {
+    width: 335px !important; /* 6x2 နှစ်ခုစာ + gap အကွာအဝေး */
+    max-width: 90vw;
+    margin: 0 auto;
+}
+
+.layout-preview-box {
+    width: 100% !important;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    max-height: none !important; /* HTML ထဲက max-h-[18vh] ကို override လုပ်မယ် [cite: 2026-04-23] */
+}
+
+.apple-glass {
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.6);
+    border-radius: 24px;
+    padding: 1.25rem !important;
+}
+
+/* 🔄 Landscape Orientation Fix */
+@media (orientation: landscape) {
+    .grid-cols-1.md\:grid-cols-2 .layout-card-btn .apple-glass {
+        width: 280px !important;
+    }
+    .grid-cols-2.md\:grid-cols-4 .layout-card-btn .apple-glass {
+        width: 130px !important;
+    }
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--primary-color, #10b981);
+    border-radius: 10px;
+}
+

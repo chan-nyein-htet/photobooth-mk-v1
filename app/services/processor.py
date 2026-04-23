@@ -4,6 +4,7 @@ import base64
 import os
 from PIL import Image
 from io import BytesIO
+from app.core.config import Settings # ✅ Settings ကို import လုပ်ပါ
 
 class ImageProcessor:
     def __init__(self, upload_folder='static/uploads'):
@@ -16,7 +17,6 @@ class ImageProcessor:
             os.makedirs(folder, exist_ok=True)
 
     def save_base64_image(self, base64_data, filename):
-        """Base64 ကို JPEG အဖြစ် originals folder ထဲမှာ သိမ်းသည် (Logic မပြောင်းလဲပါ)"""
         try:
             header, encoded = base64_data.split(",", 1)
             data = base64.b64decode(encoded)
@@ -28,30 +28,30 @@ class ImageProcessor:
             print(f"❌ Error saving image: {e}")
             return None
 
-    def convert_to_pdf(self, session_id, collage_base64):
-        """Frontend က ပို့လိုက်တဲ့ Final Collage ကို 4x6 inch (300 DPI) PDF အဖြစ် ပြောင်းသည်"""
+    def convert_to_pdf(self, session_id, collage_base64, layout_id):
+        """Layout ID ပေါ်မူတည်ပြီး Dynamic Canvas Size ဖြင့် PDF ပြောင်းသည်"""
         try:
             header, encoded = collage_base64.split(",", 1)
             data = base64.b64decode(encoded)
             img = Image.open(BytesIO(data))
 
-            # ၁။ RGB ပြောင်း (PDF support ရအောင်)
             if img.mode in ("RGBA", "P"):
                 img = img.convert("RGB")
 
-            # ၂။ Physical Size ကို 4x6 inch (300 DPI) ဖြစ်အောင် Resize လုပ်မယ်
-            # 4 inch * 300 = 1200px, 6 inch * 300 = 1800px
-            # မင်းရဲ့ Collage က Portrait ဆိုရင် (1200, 1800), Landscape ဆိုရင် (1800, 1200)
-            target_size = (1200, 1800) 
+            # ✅ JSON ထဲကနေ Layout အလိုက် Canvas Size ကို ဆွဲထုတ်မယ်
+            canvas_cfg = Settings.get_canvas_config(layout_id)
+            target_size = (canvas_cfg['width'], canvas_cfg['height'])
+            
+            print(f"🎨 Processing Layout {layout_id}: Size {target_size}")
+
+            # Resize လုပ်မယ် (LANCZOS က quality အကောင်းဆုံးပဲ)
             img = img.resize(target_size, Image.Resampling.LANCZOS)
 
-            # ၃။ PDF သိမ်းမည်
             pdf_path = os.path.join(self.output_folders['strips'], f"print_{session_id}.pdf")
             img.save(pdf_path, "PDF", resolution=300.0)
-            
-            # Frontend က သုံးလို့ရအောင် relative path ပြန်ပေးမယ်
+
             return f"static/uploads/outputs/strips/print_{session_id}.pdf"
-            
+
         except Exception as e:
             print(f"❌ PDF Conversion Error: {e}")
             return None

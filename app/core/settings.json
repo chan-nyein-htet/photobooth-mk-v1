@@ -1,0 +1,19 @@
+{
+  "printer_mode": "dual",
+  "p1_size": "6x2",
+  "p2_size": "6x4",
+  "canvas_configs": {
+    "6x2": {
+      "width": 600,
+      "height": 1800
+    },
+    "6x4": {
+      "width": 1800,
+      "height": 1200
+    }
+  },
+  "active_layouts": {
+    "6x2": ["A", "B", "C", "D"],
+    "6x4": ["E", "F", "G", "H", "I", "J", "K", "L"]
+  }
+}

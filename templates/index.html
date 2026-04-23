@@ -1,13 +1,12 @@
-<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
     {% include 'includes/components/header_tags.html' %}
 </head>
 <body class="app-dynamic-bg">
     {% include 'includes/components/welcome.html' %}
-    
+
     {% include 'includes/components/collage-select.html' %}
-    
+
     {% include 'includes/components/payment.html' %}
     {% include 'includes/components/setup.html' %}
 
@@ -17,6 +16,10 @@
     </div>
 
     {% include 'includes/components/back_modal.html' %}
+
+    <script id="canvas-configs" type="application/json">
+        {{ canvas_configs | tojson }}
+    </script>
 
     <script type="module" src="{{ url_for('static', filename='js/app.js') }}?v={{ range(1, 9999) | random }}"></script>
 </body>
