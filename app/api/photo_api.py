@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.services.booth import BoothService
 from app.core.config import Settings
 
-# Blueprint Definition
+# ✅ ဒီစာကြောင်းက အရေးကြီးတယ်၊ ဒါရှိမှ photo_bp ကို အောက်မှာ သုံးလို့ရမှာ
 photo_bp = Blueprint('photo', __name__)
 booth_service = BoothService()
 
@@ -13,13 +13,13 @@ def create_order():
         amount = data.get('amount', 5000)
         layout_id = data.get('layout', '1000022813')
         order_id = booth_service.create_order(amount, layout_id)
-        
+
         # Scan ဖတ်ရင် status ကို ပြောင်းပေးမယ့် URL
         mock_payment_link = f"http://127.0.0.1:5000/api/simulate_pay/{order_id}"
-        
+
         return jsonify({
-            "status": "success", 
-            "order_id": order_id, 
+            "status": "success",
+            "order_id": order_id,
             "qr_link": mock_payment_link
         })
     except Exception as e:
@@ -49,15 +49,29 @@ def process_photos():
         data = request.get_json(force=True, silent=True) or {}
         order_id = data.get('order_id')
         images = data.get('images', [])
+        
+        # ✅ Layout ID ကို data ထဲကနေ သေချာယူမယ်
+        layout_id = data.get('layout_id') or data.get('layout', '1000022813')
+
         if not order_id or not images:
             return jsonify({"status": "error", "message": "Missing Data"}), 400
 
+        # ✅ သိမ်းလိုက်တဲ့ ပုံတွေရဲ့ URL ကို သိမ်းထားဖို့ array
+        saved_photo_urls = []
         for idx, img_base64 in enumerate(images):
-            booth_service.save_captured_photo(img_base64, order_id)
+            file_path = booth_service.save_captured_photo(img_base64, order_id)
+            if file_path:
+                url = f"/{file_path}" if not file_path.startswith('/') else file_path
+                saved_photo_urls.append(url)
 
-        layout_id = data.get('layout_id', '1000022813')
         layout_details = Settings.get_layout_details(str(layout_id))
-        return jsonify({"status": "success", "layout_details": layout_details})
+        
+        return jsonify({
+            "status": "success", 
+            "layout_details": layout_details,
+            "photo_urls": saved_photo_urls,
+            "layout_id": layout_id
+        })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 

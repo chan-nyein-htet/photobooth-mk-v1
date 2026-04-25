@@ -10,7 +10,7 @@ export const Capture = {
         if (State.session.isCapturing || State.session.currentShot >= State.config.shotLimit) return;
         State.session.isCapturing = true;
 
-        // Snap Button ကို ခေတ္တဖျောက်ထားမယ်
+        // UI Reset
         document.getElementById('snapBtn')?.classList.add('hidden-element');
 
         let count = State.config.timerValue || 3;
@@ -42,15 +42,13 @@ export const Capture = {
         if (capturedData) {
             State.session.tempImgData = capturedData;
 
-            // ✅ Camera Feed ကို ဖျောက်ပြီး Preview ပုံကို တင်မယ်
             if (liveCanvas) liveCanvas.classList.add('hidden-element');
-            
+
             if (previewImg) {
                 previewImg.src = capturedData;
                 previewImg.classList.remove('hidden-element');
             }
 
-            // ✅ Save/Retake Button တွေကို ဖော်မယ်
             if (postBtns) {
                 postBtns.classList.remove('hidden-element');
                 postBtns.style.display = 'flex';
@@ -83,11 +81,10 @@ export const Capture = {
         State.session.isCapturing = false;
         State.session.tempImgData = null;
 
-        // ✅ UI ကို Reset လုပ်ပြီး Camera Feed ပြန်ဖွင့်မယ်
         document.getElementById('liveCanvas')?.classList.remove('hidden-element');
         document.getElementById('previewImg')?.classList.add('hidden-element');
         document.getElementById('snapBtn')?.classList.remove('hidden-element');
-        
+
         const postBtns = document.getElementById('postCaptureBtns');
         if (postBtns) {
             postBtns.classList.add('hidden-element');
@@ -103,26 +100,45 @@ export const Capture = {
         if (finishBtn) {
             finishBtn.classList.remove('hidden-element');
             finishBtn.innerText = "PROCESSING...";
+            finishBtn.disabled = true;
         }
 
         try {
+            // ✅ Layout ID ကို State ထဲကနေ သေချာဆွဲထုတ်မယ်
+            const currentLayout = State.session.layoutId || '1000022813';
+
             const response = await fetch('/api/process_photos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     order_id: State.session.orderId,
+                    layout_id: currentLayout,
                     images: State.session.capturedImages
                 })
             });
 
             const result = await response.json();
+            
             if (result.status === 'success') {
+                // ✅ အရေးကြီးဆုံး Sync: Backend က ရလာတဲ့ Slot positions နဲ့ Photo Paths တွေကို သိမ်းမယ်
+                State.session.layout_details = result.layout_details;
+                State.session.capturedImages = result.photo_urls; 
+                
+                console.log("✅ Photo Processing Complete. Syncing to Editor...");
+                
                 Nav.showScreen('photoEditorView');
                 Editor.init();
+            } else {
+                throw new Error(result.message || "Server error");
             }
         } catch (error) {
             console.error("❌ Finish Error:", error);
+            alert("Error processing photos. Please try again.");
             this.isProcessing = false;
+            if (finishBtn) {
+                finishBtn.innerText = "RETRY";
+                finishBtn.disabled = false;
+            }
         }
     }
 };

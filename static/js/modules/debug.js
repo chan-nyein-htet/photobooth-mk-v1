@@ -1,16 +1,40 @@
+import { State } from './state.js';
+
 export const Debug = {
     init() {
-        // 1. Catch Runtime Errors (Syntax, Reference, Type Errors)
+        // 1. Catch Runtime Errors
         window.onerror = (msg, url, line, col, error) => {
             const fileName = url ? url.split('/').pop() : 'unknown';
             this.showCrashScreen(msg, fileName, line, col, error?.stack || 'No stack trace');
-            return true; 
+            return true;
         };
 
-        // 2. Catch Async/Promise Errors (Fetch, API errors)
+        // 2. Catch Async/Promise Errors
         window.onunhandledrejection = (event) => {
             this.showCrashScreen(event.reason, 'Async/Promise', 'N/A', 'N/A', event.reason?.stack || 'No stack trace');
         };
+
+        console.log("🛠️ Debugger Initialized. Use Debug.logState() in console for deep check.");
+    },
+
+    // ✅ State ကို အသေးစိတ် စစ်ဖို့ logic အသစ်
+    logState() {
+        console.group("🔍 SYSTEM STATE CHECK");
+        console.log("📦 Order ID:", State.session.orderId);
+        console.log("🖼️ Layout ID:", State.session.layoutId);
+        console.log("📸 Captured Photos:", State.session.capturedImages);
+        console.log("📐 Layout Details:", State.session.layout_details);
+        
+        if (!State.session.layout_details) {
+            console.error("❌ CRITICAL: Layout Details is NULL. Editor cannot start.");
+        } else {
+            console.log("✅ Layout Details Loaded.");
+        }
+
+        if (State.session.capturedImages.length === 0) {
+            console.error("❌ CRITICAL: No captured images found.");
+        }
+        console.groupEnd();
     },
 
     showCrashScreen(msg, file, line, col, stack) {
@@ -28,4 +52,7 @@ export const Debug = {
         `;
     }
 };
+
+// Console ကနေ ခေါ်သုံးလို့ရအောင် window ထဲ ထည့်ပေးမယ်
+window.Debug = Debug;
 
