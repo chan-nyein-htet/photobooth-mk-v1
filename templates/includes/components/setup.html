@@ -1,47 +1,26 @@
-<div id="setup" class="viewport hidden-element fixed inset-0 z-[9000] flex flex-col items-center justify-center p-8 text-center overflow-hidden transition-all duration-500">
+<div id="setup" class="viewport hidden-element fixed inset-0 z-[9000] overflow-hidden bg-[#050505]">
+    <div class="app-dynamic-bg opacity-20"></div>
 
-    <div class="apple-glass p-16 w-full max-w-lg relative z-10">
+    <div id="setupContent" class="relative z-10 w-full max-w-5xl px-10">
+        <div class="apple-glass p-20 md:p-32 flex flex-col items-center gap-16 text-center">
+            
+            <div id="iconStage" class="relative transform">
+                <i id="mainIcon" class="fa-solid fa-hand text-[200px] relative z-10"></i>
+            </div>
 
-        <div class="mb-12">
-            <h2 class="text-8xl font-black text-white mb-4 italic tracking-tighter leading-none drop-shadow-2xl">
-                READY?
-            </h2>
-            <div class="flex items-center justify-center gap-4">
-                <span class="h-px w-10 bg-white/20"></span>
-                <p class="text-primary uppercase tracking-[0.5em] text-[10px] font-black">
-                    8 Shots Pro Session
+            <div class="space-y-10">
+                <h2 id="setupTitle" class="text-8xl md:text-[10rem] font-black italic tracking-tighter uppercase leading-[0.8]">
+                    GET READY
+                </h2>
+                <p id="setupDesc" class="text-white/70 tracking-[0.8em] text-lg font-bold uppercase">
+                    Preparing Your Session
                 </p>
-                <span class="h-px w-10 bg-white/20"></span>
+            </div>
+
+            <div class="w-full max-w-lg bg-white/5 h-4 rounded-full overflow-hidden p-[1.5px] border border-white/10">
+                <div id="setupBar" class="h-full w-0 rounded-full"></div>
             </div>
         </div>
-
-        <div class="w-full max-w-sm mx-auto">
-            <button id="startAppBtn"
-                    class="group relative w-full rounded-[35px] bg-primary py-8 px-6 shadow-[0_20px_50px_rgba(255,215,0,0.3)] transition-all duration-300 hover:scale-[1.03] active:scale-95 flex items-center justify-center gap-4 overflow-hidden border-t border-white/30">
-
-                <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-
-                <span class="text-black font-black text-3xl uppercase tracking-tighter relative z-10">
-                    Start Shooting
-                </span>
-
-                <i class="fa-solid fa-camera text-black text-2xl relative z-10 group-hover:rotate-12 transition-transform"></i>
-            </button>
-        </div>
-
-        <div class="mt-16 flex justify-center gap-3 opacity-60">
-            <div class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_#FFD700]"></div>
-            <div class="w-2 h-2 rounded-full bg-white/20"></div>
-            <div class="w-2 h-2 rounded-full bg-white/20"></div>
-            <div class="w-2 h-2 rounded-full bg-white/20"></div>
-            <div class="w-2 h-2 rounded-full bg-white/20"></div>
-            <div class="w-2 h-2 rounded-full bg-white/20"></div>
-            <div class="w-2 h-2 rounded-full bg-white/20"></div>
-            <div class="w-2 h-2 rounded-full bg-white/20"></div>
-        </div>
     </div>
-
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary/10 rounded-full blur-[150px] pointer-events-none"></div>
-
 </div>
 

@@ -1,0 +1,60 @@
+/* ၁ စက္ကန့်အတွင်း အရောင် ၄ မျိုး တဖျတ်ဖျတ်ပြောင်းမယ့် Animation (Glow လျှော့ထားသည်) */
+@keyframes rainbow-glow {
+    0%, 100% { 
+        color: #bef264; 
+        /* Glow ကို သိသိသာသာ လျှော့ချလိုက်တယ် */
+        filter: drop-shadow(0 0 8px rgba(190, 242, 100, 0.6));
+        text-shadow: 0 0 10px rgba(190, 242, 100, 0.5);
+    }
+    25% { 
+        color: #10b981; 
+        filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
+        text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+    50% { 
+        color: #38bdf8; 
+        filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+        text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    }
+    75% { 
+        color: #ffffff; 
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    }
+}
+
+.fast-color-cycle {
+    animation: rainbow-glow 1s infinite linear !important;
+}
+
+/* Progress Bar Glow ကိုလည်း လျှော့မယ် */
+@keyframes bar-glow {
+    0%, 100% { background: #bef264; box-shadow: 0 0 10px #bef264; }
+    25% { background: #10b981; box-shadow: 0 0 10px #10b981; }
+    50% { background: #38bdf8; box-shadow: 0 0 10px #38bdf8; }
+    75% { background: #ffffff; box-shadow: 0 0 10px #ffffff; }
+}
+
+#setupBar.active-cycle {
+    animation: bar-glow 1s infinite linear !important;
+}
+
+/* Animation အရှိန်တွေကိုတော့ မူရင်းအတိုင်း ထားပေးထားတယ် */
+.gesture-icon-anim {
+    animation: gesture-vibe 1.2s infinite ease-in-out;
+}
+
+@keyframes gesture-vibe {
+    0%, 100% { transform: scale(1.1) translateY(0); }
+    50% { transform: scale(1.2) translateY(-30px); }
+}
+
+.step-entry {
+    animation: step-in-large 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes step-in-large {
+    from { opacity: 0; transform: translateY(40px) scale(0.95); filter: blur(10px); }
+    to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+

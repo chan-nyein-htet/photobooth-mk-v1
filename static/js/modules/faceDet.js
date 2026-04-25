@@ -1,35 +1,50 @@
 export const FaceDet = {
-    instance: null,
+    handInstance: null,
+    results: { multiHandLandmarks: [] },
 
     async init(videoElement) {
-        if (this.instance) return;
+        if (this.handInstance) return;
 
-        this.instance = new FaceDetection({
-            locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4/${f}`
+        console.log("✋ Initializing Hand Detection Only...");
+
+        // Hand Detection Setup (✌️ Gesture အတွက်)
+        this.handInstance = new Hands({
+            locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
         });
 
-        this.instance.setOptions({
-            model: 'short',
-            minDetectionConfidence: 0.6
+        this.handInstance.setOptions({
+            maxNumHands: 1,           // လက်တစ်ဖက်ပဲ စစ်မယ် (Performance ပိုကောင်းအောင်)
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
         });
 
-        // MediaPipe ရဲ့ library ကို ညွှန်းဖို့ window.Camera လို့ ပြောင်းထားတယ်
+        // Result ရရင် သိမ်းထားမယ်
+        this.handInstance.onResults(res => { 
+            this.results.multiHandLandmarks = res.multiHandLandmarks || []; 
+            
+            // Camera.js ထဲက callback ဆီကို ပို့ပေးမယ်
+            if (this.externalCallback) {
+                this.externalCallback(this.results);
+            }
+        });
+
+        // Camera Utils ကို သုံးပြီး Frame တိုင်းမှာ Hand Engine ဆီ ပို့မယ်
         const camera = new window.Camera(videoElement, {
             onFrame: async () => {
-                await this.instance.send({ image: videoElement });
+                await this.handInstance.send({ image: videoElement });
             },
             width: 1280,
             height: 720
         });
 
         await camera.start();
-        console.log("✅ Face Detection Engine Ready");
+        console.log("✅ Hand Detection Engine Ready (Face Disabled)");
     },
 
+    externalCallback: null,
     onResults(callback) {
-        if (this.instance) {
-            this.instance.onResults(callback);
-        }
+        this.externalCallback = callback;
     }
 };
 

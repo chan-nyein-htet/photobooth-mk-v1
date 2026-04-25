@@ -14,12 +14,13 @@ class Database:
         with self.get_connection() as conn:
             cursor = conn.cursor()
 
-            # ၁။ Photos Table
+            # ၁။ Photos Table (order_id ကို ထည့်သွင်းထားသည်)
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS photos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT DEFAULT 'Untitled',
                     photo_path TEXT NOT NULL,
+                    order_id TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
@@ -44,7 +45,7 @@ class Database:
                 )
             ''')
 
-            # ၄။ Orders Table (Updated with layout_id)
+            # ၄။ Orders Table
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS orders (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,

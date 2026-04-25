@@ -1,33 +1,21 @@
-import { Setup } from './setup.js';
 import { Capture } from './capture.js';
-import { UI } from './ui.js';
-import { State } from './state.js';
 import { Nav } from './navigation.js';
-import { Editor } from './editor.js';
+import { State } from './state.js';
 
 export const Events = {
     init() {
-        console.log("⚙️ UI Events Module Loaded");
+        console.log("⚙️ Events Module Initialized");
         this.bindCoreFlows();
         this.bindCaptureActions();
         this.bindTimerActions();
     },
 
     bindCoreFlows() {
-        document.getElementById('startPaymentBtn')?.addEventListener('click', () => {
-            Nav.showScreen('collageSelect');
-        });
-
-        document.getElementById('backToWelcomeBtn')?.addEventListener('click', () => {
-            Nav.showScreen('welcomeScreen');
-        });
-
+        document.getElementById('startPaymentBtn')?.addEventListener('click', () => Nav.showScreen('collageSelect'));
+        document.getElementById('backToWelcomeBtn')?.addEventListener('click', () => Nav.showScreen('welcomeScreen'));
         document.getElementById('startAppBtn')?.addEventListener('click', () => {
-            window.startCameraFlow();
+            if (window.startCameraFlow) window.startCameraFlow();
         });
-
-        document.getElementById('confirmResetBtn')?.addEventListener('click', () => window.resetAndBack());
-        document.getElementById('toggleOrientationBtn')?.addEventListener('click', () => window.toggleOrientation());
     },
 
     bindTimerActions() {
@@ -42,30 +30,10 @@ export const Events = {
     },
 
     bindCaptureActions() {
-        document.getElementById('snapBtn')?.addEventListener('click', () => window.startCapture());
-        document.getElementById('retakeBtn')?.addEventListener('click', () => window.retakePhoto());
-
-        document.getElementById('keepBtn')?.addEventListener('click', () => {
-            window.keepPhoto();
-
-            // 🎯 Shot Limit ပြည့်မပြည့် စစ်မယ်
-            if (State.session.capturedImages.length >= State.config.shotLimit) {
-                console.log("📸 Shot Limit Reached! Switching to Editor...");
-
-                Nav.showScreen('photoEditorView');
-
-                // 🎯 ဓာတ်ပုံ ၈ ပုံ render ဖြစ်ချိန် ခဏစောင့်ပြီးမှ Editor ကို နှိုးမယ်
-                setTimeout(() => {
-                    Editor.init();
-                    Editor.loadProject();
-                }, 100);
-            }
-        });
-
-        document.getElementById('finishBtn')?.addEventListener('click', () => {
-            if (window.handleContinue) window.handleContinue();
-            else Capture.finish();
-        });
+        document.getElementById('snapBtn')?.addEventListener('click', () => Capture.start());
+        document.getElementById('retakeBtn')?.addEventListener('click', () => Capture.resetUI());
+        document.getElementById('keepBtn')?.addEventListener('click', () => Capture.keep());
+        document.getElementById('finishBtn')?.addEventListener('click', () => Capture.finish());
     }
 };
 

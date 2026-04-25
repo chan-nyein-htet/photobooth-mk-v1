@@ -1,5 +1,9 @@
+venv/
 __pycache__/
 *.pyc
-photobooth.db
-templates/index.html1
-
+*.db
+static/uploads/originals/*
+static/uploads/outputs/*
+static/outputs/*
+wget-log
+.env

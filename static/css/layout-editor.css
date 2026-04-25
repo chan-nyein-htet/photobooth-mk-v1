@@ -1,43 +1,61 @@
-/* static/css/layout-editor.css */
-
-@layer components {
-    #photoEditorView {
-        /* Background ကို နက်မှောင်ပြီး အလယ်မှာ အလင်းစူးတဲ့ပုံစံ (Radial Gradient) လုပ်မယ် */
-        background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
-        transition: all 0.5s ease-in-out;
-    }
-
-    /* Fabric.js Canvas အတွက် Container */
-    .canvas-container {
-        margin: 0 auto;
-        box-shadow: 0 0 80px rgba(0, 0, 0, 0.8), 0 0 20px rgba(16, 185, 129, 0.1);
-        border-radius: 12px;
-        overflow: hidden;
-    }
-
-    /* Sticker Sidebar ထဲက Sticker တစ်ခုချင်းစီရဲ့ Design */
-    .sticker-item {
-        @apply w-full aspect-square bg-white/5 rounded-2xl border border-white/10 
-               flex items-center justify-center text-3xl cursor-pointer 
-               hover:bg-primary/20 hover:border-primary/50 hover:scale-105 
-               transition-all duration-300;
-    }
-
-    /* Filter ခလုတ်တွေအတွက် Custom Style */
-    .filter-btn {
-        @apply w-full py-4 px-4 bg-white/5 rounded-2xl border border-white/5 
-               text-white/60 text-[10px] font-black uppercase tracking-widest 
-               hover:bg-primary hover:text-black hover:border-primary 
-               transition-all duration-300;
-    }
-
-    /* Scrollbar ကို ဖျောက်ထားမယ် (မင်းရဲ့ Style အတိုင်း) */
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-    .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
+/* Editor Canvas Layout */
+.editor-canvas-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 95vw;
+    max-height: 50vh; /* Mobile screen နေရာချန်ဖို့ */
 }
+
+/* UI.js က Render လုပ်တဲ့ Sticker/Filter Box များ */
+#stickerList .box, #effectList .box {
+    flex: 0 0 75px; 
+    height: 75px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Active State (Gold Theme) */
+#stickerList .box.active, #effectList .box.active {
+    border-color: #FFD700 !important;
+    background: rgba(255, 215, 0, 0.15) !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+}
+
+/* Sticker Images inside box */
+#stickerList .box img {
+    width: 75%;
+    height: 75%;
+    object-fit: contain;
+}
+
+/* Filter Preview Styles */
+.fx-preview {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    margin-bottom: 8px;
+}
+
+.effect-name-tag {
+    position: absolute;
+    bottom: 4px;
+    width: 100%;
+    text-align: center;
+    font-size: 8px;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+}
+
+/* No Scrollbar Utility */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 

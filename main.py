@@ -1,14 +1,11 @@
 import socket
 import os
-from flask import Flask, render_template
-from app.api.photo_api import photo_bp
+from app import create_app # app/__init__.py ထဲက function ကို ယူသုံးရမယ်
 from app.core.config import Settings
+from flask import render_template
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-
-# ✅ Blueprint Register
-app.register_blueprint(photo_bp, url_prefix='/api')
+# ✅ Flask App ကို create_app() ကနေတစ်ဆင့် ဆောက်ရမယ်
+app = create_app()
 
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -23,16 +20,10 @@ def get_local_ip():
 
 @app.route('/')
 def index():
-    # ၁။ Settings အကုန်လုံးကို Load လုပ်မယ်
     all_settings = Settings.load()
-    
-    # ၂။ Dictionary Format နဲ့ Layout တွေကို ယူမယ် (6x2, 6x4 ခွဲပြီးသား)
     active_layouts = Settings.get_allowed_layouts()
-    
-    # ၃။ Canvas Configs တွေကို ယူမယ်
     canvas_configs = all_settings.get('canvas_configs', {})
-
-    # ၄။ Template ဆီ နာမည်မှန်မှန်နဲ့ ပို့မယ်
+    
     return render_template(
         'index.html',
         printer_mode=all_settings.get('printer_mode', 'dual'),

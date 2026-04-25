@@ -1,0 +1,72 @@
+<div id="admin-panel" class="hidden fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center p-2">
+    <div class="bg-gray-900 border border-gray-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+        
+        <div class="px-6 py-4 border-b border-gray-800 flex justify-between items-center bg-gray-800/50 shrink-0">
+            <h2 class="text-xl font-bold text-blue-500 flex items-center gap-2">⚙️ Photobooth Admin Panel</h2>
+            <button onclick="Admin.toggle()" class="text-gray-400 text-2xl p-2">&times;</button>
+        </div>
+
+        <div class="p-6 space-y-6 overflow-y-auto custom-scrollbar">
+            
+            <div class="grid grid-cols-1 md:grid-cols-[1fr,300px] gap-6">
+                
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Display Name</label>
+                            <input type="text" id="admin_layout_name" placeholder="e.g. Wedding Floral" 
+                                   class="w-full bg-gray-800 border border-gray-700 p-3 rounded-lg text-white text-sm outline-none focus:ring-1 focus:ring-blue-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Size Type</label>
+                            <select id="admin_size_type" class="w-full bg-gray-800 border border-gray-700 p-3 rounded-lg text-white text-sm cursor-pointer">
+                                <option value="6x2">6x2 (Strip)</option>
+                                <option value="6x4">6x4 (Grid)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">PNG Template</label>
+                        <div class="border-2 border-dashed border-gray-700 p-4 rounded-xl text-center group hover:border-blue-500 transition-all">
+                            <input type="file" id="admin_tpl_file" accept="image/png" class="hidden">
+                            <button onclick="document.getElementById('admin_tpl_file').click()" class="bg-blue-600/10 text-blue-400 px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-600/20 transition-all">📁 Choose PNG File</button>
+                            <p id="file-name-display" class="text-[10px] text-gray-500 mt-2 font-mono truncate">No file chosen</p>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="admin_layout_id">
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Slots Configuration (JSON)</label>
+                        <textarea id="admin_slots_json" rows="4" class="w-full bg-gray-800 border border-gray-700 p-3 rounded-lg text-white font-mono text-[10px]"></textarea>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Live Preview</label>
+                    <div class="bg-gray-800 border border-gray-700 w-full aspect-[2/3] rounded-xl flex items-center justify-center p-2 overflow-hidden">
+                        <img id="admin_tpl_preview" src="" class="hidden max-w-full max-h-full object-contain shadow-2xl">
+                        <div id="preview-placeholder" class="text-center text-gray-600">
+                            <p class="text-[10px]">Select image to preview</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="Admin.save()" id="admin_save_btn" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+                🚀 Register New Template
+            </button>
+
+            <div class="mt-8 pt-6 border-t border-gray-800">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Active Templates (CRUD)</h3>
+                    <button onclick="Admin.loadLayouts()" class="text-blue-500 text-[10px] font-bold hover:underline">🔄 REFRESH</button>
+                </div>
+                <div id="admin_layout_list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+

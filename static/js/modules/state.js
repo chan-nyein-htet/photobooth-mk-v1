@@ -12,7 +12,8 @@ export const State = {
         isPaid: false,
         layoutId: null,
         paperSize: '6x2',
-        totalShots: 3
+        totalShots: 3,
+        layout_details: null // 🎯 Editor အတွက် Slot Data သိမ်းမယ့်နေရာ
     },
     assets: {
         activeStickerImg: null,
@@ -23,12 +24,14 @@ export const State = {
         this.session.orderId = null;
         this.session.tempImgData = null;
         this.session.capturedImages = [];
+        this.session.isPaid = false;
         this.session.layoutId = null;
         this.session.paperSize = '6x2';
+        this.session.totalShots = 3;
+        this.session.layout_details = null;
         this.assets.activeStickerImg = null;
         this.assets.currentFilterStr = 'none';
         console.log("♻️ State Reset: Cleared for next session");
     }
 };
-// 🎯 ဒီထဲက window.selectCollage ကို ဖြုတ်လိုက်ပြီ (Collage.js မှာပဲ ထားမယ်)
 

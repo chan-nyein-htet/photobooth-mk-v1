@@ -1,126 +1,133 @@
 import { State } from './state.js';
 import { Camera } from './camera.js';
-import { Nav } from './navigation.js'; // ✅ Screen ပြောင်းဖို့ Nav သွင်းမယ်
+import { Nav } from './navigation.js';
+import { Editor } from './editor.js';
 
 export const Capture = {
     isProcessing: false,
 
     start() {
-        if (State.session.currentShot >= State.config.shotLimit) return;
-        document.getElementById('snapBtn').classList.add('hidden-element');
-        document.getElementById('timerControls').classList.add('hidden-element');
-        let count = State.config.timerValue;
+        if (State.session.isCapturing || State.session.currentShot >= State.config.shotLimit) return;
+        State.session.isCapturing = true;
+
+        // Snap Button ကို ခေတ္တဖျောက်ထားမယ်
+        document.getElementById('snapBtn')?.classList.add('hidden-element');
+
+        let count = State.config.timerValue || 3;
         const el = document.getElementById('countdown');
-        el.style.display = 'flex'; el.innerText = count;
+        if (el) {
+            el.style.display = 'flex';
+            el.innerText = count;
+        }
+
         const timer = setInterval(() => {
-            count--; if (count > 0) el.innerText = count;
-            else { clearInterval(timer); el.style.display = 'none'; this.takePhoto(); }
+            count--;
+            if (count > 0) {
+                if (el) el.innerText = count;
+            } else {
+                clearInterval(timer);
+                if (el) el.style.display = 'none';
+                this.takePhoto();
+            }
         }, 1000);
     },
 
     takePhoto() {
-        const flash = document.getElementById('flashOverlay');
-        flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
-        State.session.tempImgData = Camera.capture(document.getElementById('liveCanvas'));
-        const preview = document.getElementById('previewImg');
-        preview.src = State.session.tempImgData;
-        document.getElementById('liveCanvas').classList.add('hidden-element');
-        preview.classList.remove('hidden-element');
-        document.getElementById('postCaptureBtns').classList.remove('hidden-element');
+        const liveCanvas = document.getElementById('liveCanvas');
+        const previewImg = document.getElementById('previewImg');
+        const postBtns = document.getElementById('postCaptureBtns');
+
+        const capturedData = Camera.capture(liveCanvas);
+
+        if (capturedData) {
+            State.session.tempImgData = capturedData;
+
+            // ✅ Camera Feed ကို ဖျောက်ပြီး Preview ပုံကို တင်မယ်
+            if (liveCanvas) liveCanvas.classList.add('hidden-element');
+            
+            if (previewImg) {
+                previewImg.src = capturedData;
+                previewImg.classList.remove('hidden-element');
+            }
+
+            // ✅ Save/Retake Button တွေကို ဖော်မယ်
+            if (postBtns) {
+                postBtns.classList.remove('hidden-element');
+                postBtns.style.display = 'flex';
+            }
+        }
     },
 
     keep() {
+        if (!State.session.tempImgData) return;
+
+        if (!State.session.capturedImages) State.session.capturedImages = [];
+        State.session.capturedImages.push(State.session.tempImgData);
+
         const targetImg = document.getElementById(`shot-${State.session.currentShot}`);
         if (targetImg) {
             targetImg.src = State.session.tempImgData;
             targetImg.classList.remove('hidden-element');
         }
 
-        if (!State.session.capturedImages) State.session.capturedImages = [];
-        State.session.capturedImages.push(State.session.tempImgData);
-
         State.session.currentShot++;
 
         if (State.session.currentShot >= State.config.shotLimit) {
-            this.finish(); // ✅ events.js က ခေါ်တဲ့အတိုင်း
+            this.finish();
         } else {
             this.resetUI();
         }
     },
 
     resetUI() {
-        document.getElementById('snapBtn').classList.remove('hidden-element');
-        document.getElementById('timerControls').classList.remove('hidden-element');
-        document.getElementById('liveCanvas').classList.remove('hidden-element');
-        document.getElementById('previewImg').classList.add('hidden-element');
-        document.getElementById('postCaptureBtns').classList.add('hidden-element');
+        State.session.isCapturing = false;
+        State.session.tempImgData = null;
+
+        // ✅ UI ကို Reset လုပ်ပြီး Camera Feed ပြန်ဖွင့်မယ်
+        document.getElementById('liveCanvas')?.classList.remove('hidden-element');
+        document.getElementById('previewImg')?.classList.add('hidden-element');
+        document.getElementById('snapBtn')?.classList.remove('hidden-element');
+        
+        const postBtns = document.getElementById('postCaptureBtns');
+        if (postBtns) {
+            postBtns.classList.add('hidden-element');
+            postBtns.style.display = 'none';
+        }
     },
 
-    // ✅ events.js က Capture.finish() ဆိုပြီး လှမ်းခေါ်တဲ့ function
-    finish() {
-        this.finishAndProcess();
-    },
-
-    async finishAndProcess() {
+    async finish() {
         if (this.isProcessing) return;
         this.isProcessing = true;
-
-        console.log("🚀 Starting processing...");
-
-        // UI Fix: Save/Retake Button များကို ဖျောက်မည်
-        const postBtns = document.getElementById('postCaptureBtns');
-        if (postBtns) postBtns.classList.add('hidden-element');
 
         const finishBtn = document.getElementById('finishBtn');
         if (finishBtn) {
             finishBtn.classList.remove('hidden-element');
             finishBtn.innerText = "PROCESSING...";
-            finishBtn.disabled = true;
         }
-
-        const payload = {
-            order_id: State.session.orderId || State.session.order_id,
-            layout_id: State.session.layoutId || 'A+',
-            images: State.session.capturedImages
-        };
 
         try {
             const response = await fetch('/api/process_photos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    order_id: State.session.orderId,
+                    images: State.session.capturedImages
+                })
             });
-            const result = await response.json();
 
+            const result = await response.json();
             if (result.status === 'success') {
-                console.log("✅ Backend processed photos");
-                if (finishBtn) {
-                    finishBtn.innerText = "NEXT ➔";
-                    finishBtn.disabled = false;
-                    // ✅ NEXT ကို နှိပ်လိုက်ရင် Edit Screen ကို သွားမယ်
-                    finishBtn.onclick = () => {
-                        console.log("Moving to Edit Screen");
-                        Nav.showScreen('editScreen'); 
-                    };
-                }
-            } else {
-                console.error("❌ Backend Error:", result.message);
-                if (finishBtn) {
-                    finishBtn.innerText = "RETRY";
-                    finishBtn.disabled = false;
-                }
-                this.isProcessing = false;
+                Nav.showScreen('photoEditorView');
+                Editor.init();
             }
         } catch (error) {
-            console.error("❌ Fetch Error:", error);
+            console.error("❌ Finish Error:", error);
             this.isProcessing = false;
         }
     }
 };
 
-// Global mapping
 window.startCapture = () => Capture.start();
-window.retakePhoto = () => Capture.resetUI();
 window.keepPhoto = () => Capture.keep();
-window.finishCapture = () => Capture.finish();
+window.retakePhoto = () => Capture.resetUI();
 

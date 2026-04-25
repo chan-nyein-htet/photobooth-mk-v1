@@ -1,98 +1,91 @@
 from flask import Blueprint, request, jsonify
 from app.services.booth import BoothService
-import uuid
+from app.core.config import Settings
 
-photo_bp = Blueprint('photo_api', __name__)
+# Blueprint Definition
+photo_bp = Blueprint('photo', __name__)
 booth_service = BoothService()
-
-# Memory ထဲမှာ payment status သိမ်းရန်
-payments = {}
-
-@photo_bp.route('/assets', methods=['GET'])
-def get_assets():
-    """Stickers နဲ့ Filters စာရင်းကို ပြန်ပေးခြင်း"""
-    return jsonify({
-        "stickers": [],
-        "filters": ["none", "grayscale", "sepia", "vivid"]
-    })
 
 @photo_bp.route('/create_order', methods=['POST'])
 def create_order():
-    """အော်ဒါအသစ်ဆောက်ပြီး ID ထုတ်ပေးခြင်း"""
     try:
         data = request.get_json(force=True, silent=True) or {}
-        # Layout သတ်မှတ်ချက် (Default: A)
-        layout = data.get('layout', 'A')
+        amount = data.get('amount', 5000)
+        layout_id = data.get('layout', '1000022813')
+        order_id = booth_service.create_order(amount, layout_id)
         
-        # Unique Order ID ဆောက်မယ်
-        order_id = str(uuid.uuid4())[:8].upper()
-        payments[order_id] = "pending"
-
-        print(f"📦 New Order Created: {order_id} (Layout: {layout})")
+        # Scan ဖတ်ရင် status ကို ပြောင်းပေးမယ့် URL
+        mock_payment_link = f"http://127.0.0.1:5000/api/simulate_pay/{order_id}"
+        
         return jsonify({
-            "status": "success",
-            "order_id": order_id,
-            "qr_link": "/static/assets/payment_qr.png"
+            "status": "success", 
+            "order_id": order_id, 
+            "qr_link": mock_payment_link
         })
     except Exception as e:
-        print(f"❌ Create Order Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@photo_bp.route('/check_payment/<order_id>', methods=['GET'])
-def check_payment(order_id):
-    """ငွေပေးချေမှု အခြေအနေကို စစ်ဆေးခြင်း"""
-    # Case sensitivity အတွက် upper လုပ်ပြီးစစ်မယ်
-    target_id = order_id.upper()
-    status = payments.get(target_id, "not_found")
-    
-    paid = (status == "completed")
-    return jsonify({"status": "success", "paid": paid})
+@photo_bp.route('/simulate_pay/<order_id>', methods=['GET'])
+def simulate_pay(order_id):
+    try:
+        booth_service.update_order_status(order_id.upper(), 'paid')
+        return f"<h1>Payment Success!</h1><p>Order {order_id} is now PAID. Go back to your booth screen.</p>"
+    except Exception as e:
+        return str(e), 500
 
 @photo_bp.route('/pay/<order_id>', methods=['GET'])
-def simulate_pay(order_id):
-    """ငွေပေးချေမှုကို အတုပြုလုပ်ခြင်း (Testing အတွက်)"""
-    target_id = order_id.upper()
-    if target_id in payments:
-        payments[target_id] = "completed"
-        print(f"✅ Order {target_id} marked as paid!")
-        return jsonify({"status": "success", "message": f"Order {target_id} marked as paid!"})
-    
-    print(f"❌ Payment Failed: {target_id} not found in {list(payments.keys())}")
-    return jsonify({"status": "error", "message": "Order not found"}), 404
+@photo_bp.route('/check_payment/<order_id>', methods=['GET'])
+def check_payment(order_id):
+    try:
+        status = booth_service.check_payment(order_id.upper())
+        paid = (status in ['paid', 'completed'])
+        return jsonify({"status": "success", "paid": paid, "db_status": status})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @photo_bp.route('/process_photos', methods=['POST'])
 def process_photos():
-    """ဓာတ်ပုံများကို သိမ်းဆည်းပြီး PDF အဖြစ် ပြောင်းလဲခြင်း"""
     try:
         data = request.get_json(force=True, silent=True) or {}
         order_id = data.get('order_id')
-        layout_id = data.get('layout_id', 'A') # UI က ပို့ပေးတဲ့ Layout ID
-        raw_images = data.get('images', [])
-        collage_base64 = data.get('collage') # Frontend က ဆောက်ထားတဲ့ Final Collage
+        images = data.get('images', [])
+        if not order_id or not images:
+            return jsonify({"status": "error", "message": "Missing Data"}), 400
 
-        if not raw_images:
-            print(f"⚠️ No images received for Order: {order_id}")
-            return jsonify({"status": "error", "message": "No raw images received"}), 400
+        for idx, img_base64 in enumerate(images):
+            booth_service.save_captured_photo(img_base64, order_id)
 
-        print(f"📸 Processing {len(raw_images)} photos for Order: {order_id} (Layout: {layout_id})")
-
-        # ၁။ Raw Photos များကို Originals Folder ထဲမှာ သိမ်းဆည်းခြင်း
-        for i, b64 in enumerate(raw_images):
-            booth_service.processor.save_base64_image(b64, f"raw_{order_id}_{i}.jpg")
-
-        # ၂။ PDF ပြောင်းခြင်း (Dynamic Canvas Size Logic ကို သုံးမည်)
-        pdf_url = None
-        if collage_base64:
-            # Settings Class ကနေ Canvas size ကို အလိုအလျောက် ယူသွားလိမ့်မယ်
-            pdf_url = booth_service.processor.convert_to_pdf(order_id, collage_base64, layout_id)
-
-        return jsonify({
-            "status": "success",
-            "message": "Photos processed successfully",
-            "order_id": order_id,
-            "pdf_url": pdf_url
-        })
+        layout_id = data.get('layout_id', '1000022813')
+        layout_details = Settings.get_layout_details(str(layout_id))
+        return jsonify({"status": "success", "layout_details": layout_details})
     except Exception as e:
-        print(f"❌ Process Photos Error: {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@photo_bp.route('/assets', methods=['GET'])
+def get_assets():
+    return jsonify({
+        "filters": [
+            {"name": "Normal", "filter": "none"},
+            {"name": "Grayscale", "filter": "grayscale(100%)"},
+            {"name": "Sepia", "filter": "sepia(100%)"},
+            {"name": "Warm", "filter": "sepia(30%) contrast(110%)"}
+        ],
+        "stickers": []
+    })
+
+@photo_bp.route('/process_final', methods=['POST'])
+def process_final():
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+        order_id = data.get('order_id')
+        layout_id = data.get('layout_id')
+        final_image_base64 = data.get('final_image')
+
+        if not final_image_base64 or not order_id:
+            return jsonify({"status": "error", "message": "Incomplete Data"}), 400
+
+        pdf_url = booth_service.generate_final_print(final_image_base64, order_id, layout_id)
+        return jsonify({"status": "success", "pdf_url": pdf_url})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 

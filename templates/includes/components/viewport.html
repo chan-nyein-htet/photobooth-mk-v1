@@ -1,7 +1,7 @@
 <main class="viewport relative flex-1 flex flex-col items-center justify-center p-4 overflow-hidden">
-    
-    <div id="flashOverlay" class="fixed inset-0 bg-white z-[10000] opacity-0 pointer-events-none transition-opacity duration-75"></div>                           
-    
+
+    <div id="flashOverlay" class="fixed inset-0 bg-white z-[10000] opacity-0 pointer-events-none transition-opacity duration-75"></div>
+
     <div class="absolute top-6 left-0 right-0 flex justify-between items-center px-6 z-[60]">
         <button id="toggleOrientationBtn" class="flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-white active:scale-95 transition-all">
             <i class="fa-solid fa-rotate text-xs text-primary"></i>
@@ -13,15 +13,15 @@
     </div>
 
     <div id="vfContainer" class="vf-container mode-portrait relative apple-glass overflow-hidden border-white/20 shadow-2xl transition-all duration-500 ease-in-out">
-        
+
         <div id="countdown" class="absolute inset-0 flex items-center justify-center z-[55] text-9xl font-black text-primary pointer-events-none italic drop-shadow-2xl"></div>
-        
+
         <canvas id="liveCanvas" class="w-full h-full object-cover"></canvas>
         <img id="previewImg" class="hidden-element absolute inset-0 w-full h-full object-cover">
         <video id="video" autoplay playsinline muted class="hidden"></video>
 
         <div class="absolute bottom-8 left-0 right-0 z-50 flex flex-col items-center gap-6">
-            
+
             <div id="timerControls" class="flex p-1.5 bg-white/5 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-xl">
                 <button class="timer-opt px-4 py-2 text-[10px] font-bold rounded-xl text-white/40 uppercase active-timer transition-all" data-sec="3">3s</button>
                 <button class="timer-opt px-4 py-2 text-[10px] font-bold rounded-xl text-white/40 uppercase" data-sec="5">5s</button>
@@ -47,6 +47,5 @@
     <div class="gallery-wrapper">
         <div id="sidebarPhotoGrid" class="no-scrollbar scroll-smooth"></div>
     </div>
-
 </main>
 

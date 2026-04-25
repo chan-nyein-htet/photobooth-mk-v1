@@ -1,15 +1,16 @@
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
     {% include 'includes/components/header_tags.html' %}
+    <title>PhotoBooth MK-V2 | Admin Ready</title>
 </head>
-<body class="app-dynamic-bg">
+<body class="app-dynamic-bg text-slate-200 antialiased selection:bg-blue-500/30">
+
     {% include 'includes/components/welcome.html' %}
-
     {% include 'includes/components/collage-select.html' %}
-
     {% include 'includes/components/payment.html' %}
     {% include 'includes/components/setup.html' %}
-	{% include 'includes/components/editor.html' %}
+    {% include 'includes/components/editor.html' %}
 
     <div class="app-shell hidden-element" id="mainApp">
         {% include 'includes/components/sidebars.html' %}
@@ -17,6 +18,8 @@
     </div>
 
     {% include 'includes/components/back_modal.html' %}
+    
+    {% include 'includes/components/admin.html' %}
 
     <script id="canvas-configs" type="application/json">
         {{ canvas_configs | tojson }}
