@@ -1,61 +1,103 @@
-/* Editor Canvas Layout */
+/* Editor Main Container */
+#photoEditorView {
+    background: var(--app-bg);
+    touch-action: none;
+}
+
+/* 🎯 Canvas Wrapper */
 .editor-canvas-wrapper {
+    position: relative;
+    width: 100%;
+    height: 50vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 95vw;
-    max-height: 50vh; /* Mobile screen နေရာချန်ဖို့ */
+    overflow: hidden;
 }
 
-/* UI.js က Render လုပ်တဲ့ Sticker/Filter Box များ */
-#stickerList .box, #effectList .box {
-    flex: 0 0 75px; 
-    height: 75px;
+/* 🎯 Canvas Container */
+.canvas-container {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #fff;
+    position: relative !important;
+    border-radius: 8px;
+}
+
+/* 🎯 Arrow Controls Popup - အောက်နားကို ချပေးထားတယ် */
+.editor-controls-popup {
+    position: absolute;
+    bottom: 120px; /* Panel အပေါ်နားလေးမှာ ရှိနေအောင် bottom ကို သုံးထားတယ် */
+    right: 20px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.arrow-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.move-btn {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.move-btn:active {
+    background: var(--color-primary);
+    color: black;
+    transform: scale(0.9);
+}
+
+/* Filter Box Style */
+#effectList .box {
+    flex: 0 0 75px;
+    height: 85px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    position: relative;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s;
 }
 
-/* Active State (Gold Theme) */
-#stickerList .box.active, #effectList .box.active {
-    border-color: #FFD700 !important;
-    background: rgba(255, 215, 0, 0.15) !important;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+#effectList .box.active {
+    background: var(--color-primary) !important;
+    border-color: var(--color-primary);
 }
 
-/* Sticker Images inside box */
-#stickerList .box img {
-    width: 75%;
-    height: 75%;
-    object-fit: contain;
+#effectList .box.active span {
+    color: black !important;
 }
 
-/* Filter Preview Styles */
-.fx-preview {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    margin-bottom: 8px;
+/* Gallery Hover */
+.gallery-item img {
+    border: 3px solid transparent;
+    transition: all 0.3s;
 }
 
-.effect-name-tag {
-    position: absolute;
-    bottom: 4px;
-    width: 100%;
-    text-align: center;
-    font-size: 8px;
-    font-weight: 900;
-    color: rgba(255, 255, 255, 0.6);
-    text-transform: uppercase;
+.gallery-item img:hover {
+    transform: scale(1.05);
+    border-color: var(--color-primary);
 }
 
-/* No Scrollbar Utility */
 .no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
