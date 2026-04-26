@@ -13,4 +13,6 @@
 @import "./layout-setup.css";
 @import "./layout-payment.css";
 @import "./layout-collage.css";
-@import "layout-editor.css";
+@import "./layout-editor.css";
+@import "./layout-sticker.css"; /* 🎯 Sticker Layout အသစ်ကို ဒီမှာ import ပေးလိုက်မယ် */
+

@@ -1,182 +1,143 @@
 import { State } from './state.js';
+import { Filters } from './filters.js';
 
 export const Editor = {
     canvas: null,
     selectedSlot: null,
-    filterList: [],
 
     async init() {
-        console.log("🚀 Editor Engine Starting...");
         window.Editor = Editor;
-        if (typeof fabric !== 'undefined') {
-            fabric.filterBackend = fabric.initFilterBackend();
-        }
         await Editor.loadProject();
     },
 
     async loadProject() {
-        if (!State.session.layout_details) {
-            setTimeout(() => Editor.loadProject(), 100);
-            return;
-        }
-
+        if (!State.session.layout_details) { setTimeout(() => Editor.loadProject(), 100); return; }
         const { layoutId, paperSize, capturedImages } = State.session;
-        const layoutDetails = State.session.layout_details;
-        const backendSlots = layoutDetails.slots || [];
         const templatePath = `/static/templates/${paperSize}/${layoutId}.png`;
 
         return new Promise((resolve) => {
             fabric.Image.fromURL(templatePath, (img) => {
                 if (!img) return resolve();
-
                 if (!Editor.canvas) {
                     Editor.canvas = new fabric.Canvas('editorCanvas', {
-                        width: img.width,
-                        height: img.height,
                         backgroundColor: '#fff',
                         preserveObjectStacking: true,
-                        selection: true // Selection ကို true ပေးထားမယ်
+                        selection: false,
+                        renderOnAddRemove: false // Speed up initial load
                     });
-                } else {
-                    Editor.canvas.setDimensions({ width: img.width, height: img.height });
-                    Editor.canvas.clear();
                 }
+                Editor.canvas.setDimensions({ width: img.width, height: img.height });
+                Editor.canvas.clear();
 
-                // UI Auto-Scaling
-                const wrapper = document.querySelector('.editor-canvas-wrapper');
-                const container = document.querySelector('.canvas-container');
-                if (wrapper && container) {
-                    const scale = Math.min((wrapper.clientWidth - 20) / img.width, (wrapper.clientHeight - 20) / img.height);
-                    container.style.width = `${img.width}px`;
-                    container.style.height = `${img.height}px`;
-                    container.style.transform = `scale(${scale})`;
-                    container.style.transformOrigin = 'center center';
-                }
-
-                Editor.syncToSlots(backendSlots, capturedImages);
-                Editor.renderFilterTray();
-
-                img.set({ left: 0, top: 0, selectable: false, evented: false });
-                Editor.canvas.setOverlayImage(img, Editor.canvas.renderAll.bind(Editor.canvas), {
-                    crossOrigin: 'anonymous'
+                const slots = State.session.layout_details.slots || [];
+                slots.forEach((slot, i) => {
+                    if (capturedImages[i]) Editor.addImageToSlot(capturedImages[i], slot);
                 });
 
+                img.set({ left: 0, top: 0, selectable: false, evented: false });
+                Editor.canvas.setOverlayImage(img, () => {
+                    Editor.canvas.renderAll();
+                    const wrapper = document.querySelector('.editor-canvas-wrapper');
+                    const container = document.querySelector('.canvas-container');
+                    if (wrapper && container) {
+                        const scale = Math.min((wrapper.clientWidth - 20) / img.width, (wrapper.clientHeight - 20) / img.height);
+                        container.style.transform = `scale(${scale})`;
+                    }
+                    resolve();
+                });
+
+                Filters.init(Editor.canvas);
+                Editor.renderGalleryTray(capturedImages);
                 Editor.bindEvents();
                 Editor.bindCanvasSelection();
-                resolve();
             }, { crossOrigin: 'anonymous' });
         });
     },
 
     addImageToSlot(dataUrl, slot) {
         fabric.Image.fromURL(dataUrl, (img) => {
-            if (!img) return;
             const scale = Math.max(slot.w / img.width, slot.h / img.height);
             img.set({
-                left: slot.x + (slot.w / 2),
-                top: slot.y + (slot.h / 2),
+                left: slot.x + (slot.w / 2), top: slot.y + (slot.h / 2),
                 originX: 'center', originY: 'center',
                 scaleX: scale, scaleY: scale,
-                isPhoto: true,
-                hasControls: true, // User ရွှေ့လို့ရအောင်
-                borderColor: 'var(--color-primary)',
-                cornerColor: 'var(--color-primary)',
-                cornerSize: 10,
-                slotData: slot
+                isPhoto: true, hasControls: false, hasBorders: false,
+                perPixelTargetFind: true,
+                slotData: slot, currentFilterName: 'none'
             });
-
-            img.clipPath = new fabric.Rect({
-                left: slot.x, top: slot.y, width: slot.w, height: slot.h, absolutePositioned: true
-            });
-
+            img.clipPath = new fabric.Rect({ left: slot.x, top: slot.y, width: slot.w, height: slot.h, absolutePositioned: true });
             Editor.canvas.add(img);
             img.sendToBack();
             Editor.canvas.requestRenderAll();
         }, { crossOrigin: 'anonymous' });
     },
 
-    moveSelected(dir) {
-        const active = Editor.canvas.getActiveObject();
-        if (!active || !active.isPhoto) return;
-        const step = 15;
-        if (dir === 'up') active.top -= step;
-        if (dir === 'down') active.top += step;
-        if (dir === 'left') active.left -= step;
-        if (dir === 'right') active.left += step;
-        Editor.canvas.requestRenderAll();
-    },
+    async goToStickerStage() {
+        const btn = document.getElementById('saveEditBtn');
+        if (btn) { btn.innerText = "PREPARING..."; btn.disabled = true; }
 
-    renderFilterTray() {
-        const tray = document.getElementById('effectList');
-        if (!tray) return;
+        // 🎯 Badge တွေကို ဖျက်ပြီးမှ Export လုပ်မယ်
+        const badge = Editor.canvas.getObjects().find(o => o.isBadge);
+        if (badge) Editor.canvas.remove(badge);
+        Editor.canvas.discardActiveObject().renderAll();
 
-        this.filterList = [
-            { name: 'Original', f: null },
-            { name: 'B&W', f: new fabric.Image.filters.Grayscale() },
-            { name: 'Sepia', f: new fabric.Image.filters.Sepia() },
-            { name: 'Bright', f: new fabric.Image.filters.Brightness({ brightness: 0.1 }) }
-        ];
-
-        tray.innerHTML = this.filterList.map((f, i) => `
-            <div class="box" onclick="window.Editor.applyFilter(${i})">
-                <div class="w-6 h-6 rounded-full border border-white/20 mb-1"></div>
-                <span class="text-[8px] font-black uppercase">${f.name}</span>
-            </div>
-        `).join('');
-    },
-
-    applyFilter(index) {
-        const active = Editor.canvas.getActiveObject();
-        if (!active || !active.isPhoto) return;
-
-        const filterObj = this.filterList[index].f;
-        active.filters = filterObj ? [filterObj] : [];
-        active.applyFilters();
-        Editor.canvas.requestRenderAll();
-
-        document.querySelectorAll('#effectList .box').forEach((el, i) => {
-            el.classList.toggle('active', i === index);
-        });
-    },
-
-    swapPhoto(url) {
-        if (!Editor.selectedSlot) return;
-        const slot = Editor.selectedSlot.slotData;
-        const oldObj = Editor.selectedSlot;
-
-        fabric.Image.fromURL(url, (newImg) => {
-            const scale = Math.max(slot.w / newImg.width, slot.h / newImg.height);
-            newImg.set({
-                left: oldObj.left, top: oldObj.top,
-                originX: 'center', originY: 'center',
-                scaleX: scale, scaleY: scale,
-                isPhoto: true, hasControls: true,
-                clipPath: oldObj.clipPath, slotData: slot
+        try {
+            // 🎯 Export multiplier ကို ၁ ပဲထားမယ် (Mobile မှာ hang မဖြစ်အောင်)
+            const editedImage = Editor.canvas.toDataURL({ 
+                format: 'png', 
+                quality: 0.8,
+                multiplier: 1.5 
             });
-            Editor.canvas.remove(oldObj);
-            Editor.canvas.add(newImg);
-            newImg.sendToBack();
-            Editor.canvas.setActiveObject(newImg);
-            Editor.canvas.requestRenderAll();
-        }, { crossOrigin: 'anonymous' });
+
+            const nextView = document.getElementById('stickerOverlayView');
+            const currView = document.getElementById('photoEditorView');
+
+            if (nextView) {
+                if (currView) currView.style.display = 'none';
+                nextView.style.display = 'flex';
+                nextView.classList.remove('hidden-element');
+                
+                // 🎯 အရင် Canvas ပေါ်လာအောင်လုပ်ပြီးမှ sticker init ခေါ်မယ်
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        if (window.Stickers) window.Stickers.initCanvas(editedImage);
+                    }, 100);
+                });
+            }
+        } catch (err) {
+            console.error("Export Error:", err);
+            alert("Something went wrong during export.");
+        }
+        if (btn) { btn.innerText = "Next Step ✨"; btn.disabled = false; }
     },
 
-    renderGalleryTray(images) {
-        const tray = document.getElementById('galleryList');
-        if (!tray) return;
-        tray.innerHTML = images.map(url => `
-            <div class="gallery-item w-20 h-20 flex-shrink-0" onclick="window.Editor.swapPhoto('${url}')">
-                <img src="${url}" class="w-full h-full object-cover rounded-xl shadow-lg">
-            </div>
-        `).join('');
+    handleSelection(obj) {
+        if (obj && obj.isPhoto) {
+            Editor.selectedSlot = obj;
+            this.toggleControls(true);
+            if (window.Filters) window.Filters.updateFilterUI(obj.currentFilterName || 'none');
+            this.drawSelectionBadge(obj);
+        }
     },
 
-    syncToSlots(slots, images) {
-        if (!images || images.length === 0) return;
-        slots.forEach((slot, i) => {
-            if (images[i]) Editor.addImageToSlot(images[i], slot);
+    drawSelectionBadge(obj) {
+        const objects = Editor.canvas.getObjects();
+        objects.forEach(o => { if (o.isBadge) Editor.canvas.remove(o); });
+        const slot = obj.slotData;
+        const badge = new fabric.Group([
+            new fabric.Rect({ width: 75, height: 22, fill: '#22c55e', rx: 5, ry: 5 }),
+            new fabric.Text("SELECTED", { fontSize: 10, fill: '#fff', fontWeight: '900', originX: 'center', originY: 'center', left: 37, top: 11 })
+        ], { left: slot.x + 5, top: slot.y + 5, isBadge: true, selectable: false, evented: false });
+        Editor.canvas.add(badge);
+        badge.bringToFront();
+        Editor.canvas.requestRenderAll();
+    },
+
+    toggleControls(show) {
+        ['effectList', 'selectionBadge', 'controlArrows'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden', !show);
         });
-        Editor.renderGalleryTray(images);
     },
 
     bindCanvasSelection() {
@@ -184,51 +145,43 @@ export const Editor = {
         Editor.canvas.on('selection:updated', (e) => this.handleSelection(e.selected[0]));
         Editor.canvas.on('selection:cleared', () => {
             Editor.selectedSlot = null;
-            document.getElementById('effectList')?.classList.add('hidden');
-            document.getElementById('selectionBadge')?.classList.add('hidden');
-            document.getElementById('controlArrows')?.classList.add('hidden');
+            this.toggleControls(false);
+            const b = Editor.canvas.getObjects().find(o => o.isBadge);
+            if (b) Editor.canvas.remove(b);
         });
     },
 
-    handleSelection(obj) {
-        if (obj && obj.isPhoto) {
-            Editor.selectedSlot = obj;
-            document.getElementById('effectList')?.classList.remove('hidden');
-            document.getElementById('selectionBadge')?.classList.remove('hidden');
-            document.getElementById('controlArrows')?.classList.remove('hidden');
-        }
+    renderGalleryTray(images) {
+        const tray = document.getElementById('galleryList');
+        if (tray) tray.innerHTML = images.map(url => `
+            <div class="gallery-item w-20 h-20 flex-shrink-0" onclick="window.Editor.swapPhoto('${url}')">
+                <img src="${url}" class="w-full h-full object-cover rounded-xl border border-white/10">
+            </div>
+        `).join('');
     },
 
     bindEvents() {
         const btn = document.getElementById('saveEditBtn');
-        if (btn) btn.onclick = () => Editor.finalize();
+        if (btn) btn.onclick = () => Editor.goToStickerStage();
     },
 
-    async finalize() {
-        const btn = document.getElementById('saveEditBtn');
-        btn.innerText = "PRINTING...";
-        btn.disabled = true;
-
-        const finalData = Editor.canvas.toDataURL({ format: 'jpeg', quality: 0.95 });
-
-        try {
-            const res = await fetch('/api/process_final', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    order_id: State.session.orderId,
-                    layout_id: State.session.layoutId,
-                    final_image: finalData
-                })
+    swapPhoto(url) {
+        if (!Editor.selectedSlot) return;
+        const slot = Editor.selectedSlot.slotData;
+        const oldObj = Editor.selectedSlot;
+        fabric.Image.fromURL(url, (newImg) => {
+            const scale = Math.max(slot.w / newImg.width, slot.h / newImg.height);
+            newImg.set({
+                left: oldObj.left, top: oldObj.top, originX: 'center', originY: 'center',
+                scaleX: scale, scaleY: scale, isPhoto: true, hasControls: false,
+                perPixelTargetFind: true, clipPath: oldObj.clipPath, slotData: slot, currentFilterName: 'none'
             });
-            const result = await res.json();
-            if (result.status === 'success') window.location.href = '/';
-        } catch (err) {
-            btn.innerText = "Print Photo ✨";
-            btn.disabled = false;
-        }
+            Editor.canvas.remove(oldObj);
+            Editor.canvas.add(newImg);
+            newImg.sendToBack();
+            Editor.canvas.setActiveObject(newImg);
+            Editor.canvas.requestRenderAll();
+        }, { crossOrigin: 'anonymous' });
     }
 };
-
-window.Editor = Editor;
 

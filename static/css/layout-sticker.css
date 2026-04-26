@@ -1,0 +1,40 @@
+/* Sticker Canvas Container Style */
+#stickerOverlayView .canvas-container {
+    background: #fff;
+    position: relative !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Sticker Selection Box Style */
+#stickerTray .box {
+    flex: 0 0 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#stickerTray .box:active {
+    transform: scale(0.9);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-primary);
+}
+
+#stickerTray .box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Hide Scrollbar for Tray */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
