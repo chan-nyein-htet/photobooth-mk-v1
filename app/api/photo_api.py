@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.services.booth import BoothService
 from app.core.config import Settings
 
-# ✅ ဒီစာကြောင်းက အရေးကြီးတယ်၊ ဒါရှိမှ photo_bp ကို အောက်မှာ သုံးလို့ရမှာ
+# Blueprint သတ်မှတ်ခြင်း
 photo_bp = Blueprint('photo', __name__)
 booth_service = BoothService()
 
@@ -14,7 +14,7 @@ def create_order():
         layout_id = data.get('layout', '1000022813')
         order_id = booth_service.create_order(amount, layout_id)
 
-        # Scan ဖတ်ရင် status ကို ပြောင်းပေးမယ့် URL
+        # Original logic အတိုင်းထားသည်
         mock_payment_link = f"http://127.0.0.1:5000/api/simulate_pay/{order_id}"
 
         return jsonify({
@@ -29,7 +29,7 @@ def create_order():
 def simulate_pay(order_id):
     try:
         booth_service.update_order_status(order_id.upper(), 'paid')
-        return f"<h1>Payment Success!</h1><p>Order {order_id} is now PAID. Go back to your booth screen.</p>"
+        return f"<h1>Payment Success!</h1><p>Order {order_id} is now PAID.</p>"
     except Exception as e:
         return str(e), 500
 
@@ -49,14 +49,11 @@ def process_photos():
         data = request.get_json(force=True, silent=True) or {}
         order_id = data.get('order_id')
         images = data.get('images', [])
-        
-        # ✅ Layout ID ကို data ထဲကနေ သေချာယူမယ်
         layout_id = data.get('layout_id') or data.get('layout', '1000022813')
 
         if not order_id or not images:
             return jsonify({"status": "error", "message": "Missing Data"}), 400
 
-        # ✅ သိမ်းလိုက်တဲ့ ပုံတွေရဲ့ URL ကို သိမ်းထားဖို့ array
         saved_photo_urls = []
         for idx, img_base64 in enumerate(images):
             file_path = booth_service.save_captured_photo(img_base64, order_id)
@@ -65,27 +62,48 @@ def process_photos():
                 saved_photo_urls.append(url)
 
         layout_details = Settings.get_layout_details(str(layout_id))
-        
+        all_settings = Settings.load()
+
+        paper_size = "6x2"
+        for size, layouts in all_settings.get('active_layouts', {}).items():
+            if str(layout_id) in layouts:
+                paper_size = size
+                break
+
+        config = all_settings.get('canvas_configs', {}).get(paper_size, {"width": 600, "height": 1800})
+        layout_details['target_w'] = config['width']
+        layout_details['target_h'] = config['height']
+
         return jsonify({
-            "status": "success", 
+            "status": "success",
             "layout_details": layout_details,
             "photo_urls": saved_photo_urls,
-            "layout_id": layout_id
+            "layout_id": layout_id,
+            "paper_size": paper_size
         })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# 🎯 FIXED: Route နာမည် မပြောင်းပါ။ sqlite3.Row object syntax ([]) ကိုသုံးထားသည်။
 @photo_bp.route('/assets', methods=['GET'])
 def get_assets():
-    return jsonify({
-        "filters": [
-            {"name": "Normal", "filter": "none"},
-            {"name": "Grayscale", "filter": "grayscale(100%)"},
-            {"name": "Sepia", "filter": "sepia(100%)"},
-            {"name": "Warm", "filter": "sepia(30%) contrast(110%)"}
-        ],
-        "stickers": []
-    })
+    try:
+        db_stickers = booth_service.get_all_stickers()
+        db_filters = booth_service.get_all_filters()
+
+        return jsonify({
+            "status": "success",
+            "filters": [
+                {
+                    "name": f['name'],
+                    "filter": f['filter_css']
+                } for f in db_filters
+            ],
+            # DB schema အရ column name သည် 'url' ဖြစ်နေ၍ [] syntax သုံးရသည်
+            "stickers": [s['url'] for s in db_stickers if s['url']]
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @photo_bp.route('/process_final', methods=['POST'])
 def process_final():
@@ -98,8 +116,8 @@ def process_final():
         if not final_image_base64 or not order_id:
             return jsonify({"status": "error", "message": "Incomplete Data"}), 400
 
-        pdf_url = booth_service.generate_final_print(final_image_base64, order_id, layout_id)
-        return jsonify({"status": "success", "pdf_url": pdf_url})
+        image_url = booth_service.generate_final_print(final_image_base64, order_id, layout_id)
+        return jsonify({"status": "success", "image_url": image_url})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 

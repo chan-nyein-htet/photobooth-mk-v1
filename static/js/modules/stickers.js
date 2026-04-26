@@ -5,116 +5,123 @@ export const Stickers = {
     canvas: null,
 
     async init() {
+        window.Stickers = this;
         try {
             const res = await fetch('/api/assets');
-            if (!res.ok) throw new Error("Assets failed to load");
             const data = await res.json();
-            
-            // UI.renderStickers ထဲမှာ နှိပ်လိုက်ရင် Canvas ပေါ် ရောက်သွားမယ့် callback ပေးမယ်
-            UI.renderStickers(data.stickers || [], (stickerUrl) => {
-                this.addStickerToCanvas(stickerUrl);
-            });
-            console.log("✅ Stickers Initialized");
-        } catch (err) {
-            console.error("❌ Stickers Init Error:", err);
-            UI.renderStickers([], () => {});
-        }
+            UI.renderStickers(data.stickers || [], (url) => this.addStickerToCanvas(url));
+
+            document.getElementById('finalPrintBtn').onclick = () => this.finalize();
+            document.getElementById('addTextBtn').onclick = () => this.addText();
+            document.getElementById('deleteItemBtn').onclick = () => this.deleteSelected();
+        } catch (err) { console.error("❌ Init Error:", err); }
     },
 
     initCanvas(baseImage) {
-        console.log("🎨 Sticker Engine Starting...");
-        window.Stickers = Stickers;
+        if (this.canvas) this.canvas.dispose();
 
-        if (!this.canvas) {
-            this.canvas = new fabric.Canvas('stickerCanvas', {
-                preserveObjectStacking: true,
-                selection: true,
-                renderOnAddRemove: true
-            });
-        }
+        this.canvas = new fabric.Canvas('stickerCanvas', {
+            preserveObjectStacking: true,
+            selection: true,
+            renderOnAddRemove: true,
+            imageSmoothingEnabled: true,
+            stateful: false
+        });
+
+        // ✅ Resize Box တွေကို အကြီးဆုံးဖြစ်အောင် ဒီမှာ ပြင်ထားတယ်
+        fabric.Object.prototype.set({
+            transparentCorners: false,
+            cornerColor: '#00D1FF',
+            cornerStyle: 'circle',
+            borderColor: '#00D1FF',
+            borderScaleFactor: 3, // Border လိုင်းကို ပိုထူလိုက်တယ်
+            
+            // Touch interface အတွက် အဓိက အချက်များ
+            cornerSize: 45,       // အစက်လေးတွေကို မြင်သာအောင် အကြီးကြီးလုပ်ထားတယ်
+            touchCornerSize: 60,  // လက်နဲ့ထိရင် ပိုမိအောင် touch area ကို ထပ်ချဲ့ထားတယ်
+            padding: 20,          // Sticker နဲ့ control ကြား နေရာချန်တယ်
+            hasRotatingPoint: true,
+            rotatingPointOffset: 50
+        });
 
         fabric.Image.fromURL(baseImage, (img) => {
+            if (!img) return;
             this.canvas.setDimensions({ width: img.width, height: img.height });
-            this.canvas.clear();
             img.set({ selectable: false, evented: false });
             this.canvas.add(img);
             this.autoScale();
+            this.canvas.requestRenderAll();
         }, { crossOrigin: 'anonymous' });
+
+        window.addEventListener('resize', () => this.autoScale());
     },
 
     autoScale() {
         const wrapper = document.querySelector('#stickerOverlayView .editor-canvas-wrapper');
         const container = document.querySelector('#stickerOverlayView .canvas-container');
-        if (wrapper && container) {
-            const scale = Math.min((wrapper.clientWidth - 20) / this.canvas.width, (wrapper.clientHeight - 20) / this.canvas.height);
-            container.style.width = `${this.canvas.width}px`;
-            container.style.height = `${this.canvas.height}px`;
+        if (wrapper && container && this.canvas) {
+            const scale = Math.min(
+                (wrapper.clientWidth - 40) / this.canvas.width,
+                (wrapper.clientHeight - 40) / this.canvas.height
+            );
             container.style.transform = `scale(${scale})`;
             container.style.transformOrigin = 'center center';
+            
+            // ✅ Mouse/Touch coordinate တွေ မလွဲအောင် ပြန်ချိန်တာ
+            this.canvas.calcOffset();
         }
     },
 
     addStickerToCanvas(url) {
-        if (!this.canvas) return;
         fabric.Image.fromURL(url, (img) => {
+            const s = (this.canvas.width * 0.3) / img.width;
             img.set({
                 left: this.canvas.width / 2,
                 top: this.canvas.height / 2,
                 originX: 'center', originY: 'center',
-                scaleX: 0.3, scaleY: 0.3,
-                
-                // 🎯 Smooth Interaction Settings
-                padding: 10,
-                cornerSize: 24,
-                cornerColor: '#00D1FF',
-                cornerStyle: 'circle',
-                transparentCorners: false,
-                borderColor: '#00D1FF',
-                hasControls: true,
-                lockScalingFlip: true
+                scaleX: s, scaleY: s
             });
-            
-            this.canvas.add(img);
-            this.canvas.setActiveObject(img);
+            this.canvas.add(img).setActiveObject(img);
+            img.setCoords(); // ✅ Control box နေရာကို update လုပ်တာ
             this.canvas.requestRenderAll();
         }, { crossOrigin: 'anonymous' });
     },
 
     addText() {
-        if (!this.canvas) return;
-        const text = new fabric.IText('Tap to Edit', {
+        const text = new fabric.Textbox('Type Here', {
             left: this.canvas.width / 2,
             top: this.canvas.height / 2,
+            width: this.canvas.width * 0.6,
             fill: '#ffffff',
             fontSize: 60,
             fontFamily: 'Arial',
-            originX: 'center', originY: 'center',
-            padding: 15,
-            cornerSize: 24,
-            cornerColor: '#00D1FF',
-            cornerStyle: 'circle',
-            transparentCorners: false
+            textAlign: 'center',
+            originX: 'center', originY: 'center'
         });
-        this.canvas.add(text);
-        this.canvas.setActiveObject(text);
+        this.canvas.add(text).setActiveObject(text);
+        text.setCoords();
         this.canvas.requestRenderAll();
     },
 
     deleteSelected() {
         const active = this.canvas.getActiveObject();
         if (active) {
-            this.canvas.remove(active);
-            this.canvas.discardActiveObject();
-            this.canvas.requestRenderAll();
+            if (active.type === 'activeSelection') {
+                active.forEachObject(obj => this.canvas.remove(obj));
+            } else {
+                this.canvas.remove(active);
+            }
+            this.canvas.discardActiveObject().requestRenderAll();
         }
     },
 
     async finalize() {
         const btn = document.getElementById('finalPrintBtn');
-        btn.innerText = "SENDING TO PRINT...";
+        btn.innerText = "PROCESSING...";
         btn.disabled = true;
 
-        const finalData = this.canvas.toDataURL({ format: 'jpeg', quality: 0.95 });
+        this.canvas.discardActiveObject().renderAll();
+        const finalData = this.canvas.toDataURL({ format: 'png', multiplier: 2 });
 
         try {
             const res = await fetch('/api/process_final', {
@@ -126,9 +133,11 @@ export const Stickers = {
                     final_image: finalData
                 })
             });
-            const result = await res.json();
-            if (result.status === 'success') window.location.href = '/';
+            if ((await res.json()).status === 'success') {
+                window.location.href = '/';
+            } else { throw new Error(); }
         } catch (err) {
+            alert("Print failed.");
             btn.innerText = "Print Final ✨";
             btn.disabled = false;
         }

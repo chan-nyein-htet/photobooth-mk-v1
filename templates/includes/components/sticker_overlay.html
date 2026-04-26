@@ -1,17 +1,17 @@
 <section id="stickerOverlayView" class="fixed inset-0 w-full h-full flex flex-col hidden-element overflow-hidden app-dynamic-bg" style="display:none;">
     <div class="absolute inset-0 bg-black/60 -z-10"></div>
-    
+
     <div class="w-full p-4 flex justify-between items-center bg-black/20 backdrop-blur-md">
         <span class="text-white/40 text-[10px] font-black uppercase tracking-widest">Sticker Stage</span>
         <div class="flex gap-2">
-            <button onclick="window.Stickers.deleteSelected()" class="bg-red-500/20 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-red-500/30 active:scale-95">
+            <button id="deleteItemBtn" class="bg-red-500/20 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-red-500/30 active:scale-95">
                 Delete 🗑️
             </button>
         </div>
     </div>
 
-    <div class="flex-1 w-full flex items-center justify-center p-4 relative">
-        <div class="p-2 editor-canvas-wrapper relative">
+    <div class="flex-1 w-full flex items-center justify-center p-4 relative overflow-hidden">
+        <div class="p-2 editor-canvas-wrapper relative flex items-center justify-center w-full h-full">
             <div class="canvas-container overflow-hidden shadow-2xl rounded-xl">
                 <canvas id="stickerCanvas"></canvas>
             </div>
@@ -24,14 +24,13 @@
             <span id="stickerStatus" class="bg-primary px-3 py-1 rounded-full text-[9px] text-black font-heavy uppercase animate-pulse">Touch to Edit</span>
         </div>
 
-        <div id="stickerTray" class="flex gap-3 overflow-x-auto no-scrollbar py-1 min-h-[95px] items-center">
-            </div>
-        
+        <div id="stickerList" class="flex gap-3 overflow-x-auto no-scrollbar py-1 min-h-[95px] items-center"></div>
+
         <div class="flex gap-4 w-full pt-2">
-            <button onclick="window.Stickers.addText()" class="flex-1 bg-white/10 py-4 rounded-2xl text-white font-black uppercase tracking-widest active:scale-95 border border-white/10">
+            <button id="addTextBtn" class="flex-1 bg-white/10 py-4 rounded-2xl text-white font-black uppercase tracking-widest active:scale-95 border border-white/10">
                 Add Text ✍️
             </button>
-            <button id="finalPrintBtn" onclick="window.Stickers.finalize()" class="flex-1 bg-primary py-4 rounded-2xl text-black font-heavy uppercase tracking-widest active:scale-95 shadow-lg">
+            <button id="finalPrintBtn" class="flex-1 bg-primary py-4 rounded-2xl text-black font-heavy uppercase tracking-widest active:scale-95 shadow-lg">
                 Print Final ✨
             </button>
         </div>

@@ -1,29 +1,25 @@
 import { State } from './state.js';
-import { Filters } from './filters.js';
-
-export const Editor = {
+import { Filters } from './filters.js';               
+export const Editor = {                                   
     canvas: null,
-    selectedSlot: null,
-
-    async init() {
-        window.Editor = Editor;
-        await Editor.loadProject();
+    selectedSlot: null,                                   
+    async init() {                                    
+        window.Editor = Editor;                               
+        await Editor.loadProject();                   
     },
-
     async loadProject() {
         if (!State.session.layout_details) { setTimeout(() => Editor.loadProject(), 100); return; }
         const { layoutId, paperSize, capturedImages } = State.session;
         const templatePath = `/static/templates/${paperSize}/${layoutId}.png`;
-
-        return new Promise((resolve) => {
+                                                              return new Promise((resolve) => {
             fabric.Image.fromURL(templatePath, (img) => {
-                if (!img) return resolve();
+                if (!img) return resolve();           
                 if (!Editor.canvas) {
                     Editor.canvas = new fabric.Canvas('editorCanvas', {
-                        backgroundColor: '#fff',
+                        backgroundColor: '#fff',      
                         preserveObjectStacking: true,
                         selection: false,
-                        renderOnAddRemove: false // Speed up initial load
+                        renderOnAddRemove: false 
                     });
                 }
                 Editor.canvas.setDimensions({ width: img.width, height: img.height });
@@ -76,28 +72,30 @@ export const Editor = {
         const btn = document.getElementById('saveEditBtn');
         if (btn) { btn.innerText = "PREPARING..."; btn.disabled = true; }
 
-        // 🎯 Badge တွေကို ဖျက်ပြီးမှ Export လုပ်မယ်
         const badge = Editor.canvas.getObjects().find(o => o.isBadge);
         if (badge) Editor.canvas.remove(badge);
         Editor.canvas.discardActiveObject().renderAll();
 
         try {
-            // 🎯 Export multiplier ကို ၁ ပဲထားမယ် (Mobile မှာ hang မဖြစ်အောင်)
-            const editedImage = Editor.canvas.toDataURL({ 
-                format: 'png', 
+            const editedImage = Editor.canvas.toDataURL({
+                format: 'png',
                 quality: 0.8,
-                multiplier: 1.5 
+                multiplier: 1.5
             });
 
             const nextView = document.getElementById('stickerOverlayView');
             const currView = document.getElementById('photoEditorView');
 
             if (nextView) {
+                // 🎯 အရေးကြီးဆုံးပြင်ဆင်မှု: Sticker Module ကို အရင် Init လုပ်မယ်
+                if (window.Stickers && typeof window.Stickers.init === 'function') {
+                    await window.Stickers.init(); 
+                }
+
                 if (currView) currView.style.display = 'none';
                 nextView.style.display = 'flex';
                 nextView.classList.remove('hidden-element');
-                
-                // 🎯 အရင် Canvas ပေါ်လာအောင်လုပ်ပြီးမှ sticker init ခေါ်မယ်
+
                 requestAnimationFrame(() => {
                     setTimeout(() => {
                         if (window.Stickers) window.Stickers.initCanvas(editedImage);
@@ -115,7 +113,9 @@ export const Editor = {
         if (obj && obj.isPhoto) {
             Editor.selectedSlot = obj;
             this.toggleControls(true);
-            if (window.Filters) window.Filters.updateFilterUI(obj.currentFilterName || 'none');
+            if (window.Filters && typeof window.Filters.updateFilterUI === 'function') {
+                window.Filters.updateFilterUI(obj.currentFilterName || 'none');
+            }
             this.drawSelectionBadge(obj);
         }
     },
