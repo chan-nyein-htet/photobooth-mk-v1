@@ -1,25 +1,33 @@
 import { State } from './state.js';
-import { Filters } from './filters.js';               
-export const Editor = {                                   
+import { Filters } from './filters.js';
+import { UI } from './ui.js'; // 🎯 UI Module ကို Import လုပ်လိုက်ပြီ
+
+export const Editor = {
     canvas: null,
-    selectedSlot: null,                                   
-    async init() {                                    
-        window.Editor = Editor;                               
-        await Editor.loadProject();                   
+    selectedSlot: null,
+
+    async init() {
+        window.Editor = Editor;
+        await Editor.loadProject();
     },
+
     async loadProject() {
-        if (!State.session.layout_details) { setTimeout(() => Editor.loadProject(), 100); return; }
+        if (!State.session.layout_details) { 
+            setTimeout(() => Editor.loadProject(), 100); 
+            return; 
+        }
         const { layoutId, paperSize, capturedImages } = State.session;
         const templatePath = `/static/templates/${paperSize}/${layoutId}.png`;
-                                                              return new Promise((resolve) => {
+
+        return new Promise((resolve) => {
             fabric.Image.fromURL(templatePath, (img) => {
-                if (!img) return resolve();           
+                if (!img) return resolve();
                 if (!Editor.canvas) {
                     Editor.canvas = new fabric.Canvas('editorCanvas', {
-                        backgroundColor: '#fff',      
+                        backgroundColor: '#fff',
                         preserveObjectStacking: true,
                         selection: false,
-                        renderOnAddRemove: false 
+                        renderOnAddRemove: false
                     });
                 }
                 Editor.canvas.setDimensions({ width: img.width, height: img.height });
@@ -59,7 +67,7 @@ export const Editor = {
                 scaleX: scale, scaleY: scale,
                 isPhoto: true, hasControls: false, hasBorders: false,
                 perPixelTargetFind: true,
-                slotData: slot, currentFilterName: 'none'
+                slotData: slot, currentFilterName: 'none' // 🎯 Filter state သိမ်းထားတဲ့နေရာ
             });
             img.clipPath = new fabric.Rect({ left: slot.x, top: slot.y, width: slot.w, height: slot.h, absolutePositioned: true });
             Editor.canvas.add(img);
@@ -87,9 +95,8 @@ export const Editor = {
             const currView = document.getElementById('photoEditorView');
 
             if (nextView) {
-                // 🎯 အရေးကြီးဆုံးပြင်ဆင်မှု: Sticker Module ကို အရင် Init လုပ်မယ်
                 if (window.Stickers && typeof window.Stickers.init === 'function') {
-                    await window.Stickers.init(); 
+                    await window.Stickers.init();
                 }
 
                 if (currView) currView.style.display = 'none';
@@ -109,13 +116,15 @@ export const Editor = {
         if (btn) { btn.innerText = "Next Step ✨"; btn.disabled = false; }
     },
 
+    // 🎯 ဒီနေရာမှာ Sync Logic အသစ် ထည့်ထားတယ်
     handleSelection(obj) {
         if (obj && obj.isPhoto) {
             Editor.selectedSlot = obj;
             this.toggleControls(true);
-            if (window.Filters && typeof window.Filters.updateFilterUI === 'function') {
-                window.Filters.updateFilterUI(obj.currentFilterName || 'none');
-            }
+            
+            // ✅ UI Module က sync logic ကို လှမ်းခေါ်ပြီး အောက်က filter list ကို update လုပ်မယ်
+            UI.syncFilterSelection(obj.currentFilterName || 'none');
+
             this.drawSelectionBadge(obj);
         }
     },
@@ -174,7 +183,8 @@ export const Editor = {
             newImg.set({
                 left: oldObj.left, top: oldObj.top, originX: 'center', originY: 'center',
                 scaleX: scale, scaleY: scale, isPhoto: true, hasControls: false,
-                perPixelTargetFind: true, clipPath: oldObj.clipPath, slotData: slot, currentFilterName: 'none'
+                perPixelTargetFind: true, clipPath: oldObj.clipPath, slotData: slot, 
+                currentFilterName: oldObj.currentFilterName || 'none' // 🎯 Filter အဟောင်းကိုပါ ယူသွားမယ်
             });
             Editor.canvas.remove(oldObj);
             Editor.canvas.add(newImg);
@@ -182,6 +192,19 @@ export const Editor = {
             Editor.canvas.setActiveObject(newImg);
             Editor.canvas.requestRenderAll();
         }, { crossOrigin: 'anonymous' });
+    },
+
+    // Arrow Controls အတွက် moveSelected function (လိုအပ်ခဲ့ရင်)
+    moveSelected(direction) {
+        if (!Editor.selectedSlot) return;
+        const step = 5;
+        switch(direction) {
+            case 'up': Editor.selectedSlot.top -= step; break;
+            case 'down': Editor.selectedSlot.top += step; break;
+            case 'left': Editor.selectedSlot.left -= step; break;
+            case 'right': Editor.selectedSlot.left += step; break;
+        }
+        Editor.canvas.requestRenderAll();
     }
 };
 

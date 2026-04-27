@@ -4,7 +4,6 @@
     touch-action: none;
 }
 
-/* 🎯 Canvas Wrapper */
 .editor-canvas-wrapper {
     position: relative;
     width: 100%;
@@ -15,7 +14,6 @@
     overflow: hidden;
 }
 
-/* 🎯 Canvas Container */
 .canvas-container {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -24,17 +22,19 @@
     border-radius: 8px;
 }
 
-/* 🎯 Arrow Controls Popup - အောက်နားကို ချပေးထားတယ် */
 .editor-controls-popup {
-    position: absolute;
-    bottom: 120px; /* Panel အပေါ်နားလေးမှာ ရှိနေအောင် bottom ကို သုံးထားတယ် */
+    position: fixed !important; 
+    bottom: 140px;
     right: 20px;
-    z-index: 50;
+    z-index: 100;
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -58,19 +58,13 @@
     transition: all 0.2s;
 }
 
-.move-btn:active {
-    background: var(--color-primary);
-    color: black;
-    transform: scale(0.9);
-}
-
-/* Filter Box Style */
+/* 🎯 Filter Box Style */
 #effectList .box {
-    flex: 0 0 75px;
-    height: 85px;
+    flex: 0 0 90px;
+    height: 105px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
+    border-radius: 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -79,24 +73,24 @@
     transition: all 0.3s;
 }
 
+/* 🎯 Highlight logic: မလိုအပ်တာ မပြင်ဘူး Border ပဲ ပေးမယ် */
 #effectList .box.active {
     background: var(--color-primary) !important;
-    border-color: var(--color-primary);
+    border: 2px solid white !important;
 }
 
 #effectList .box.active span {
     color: black !important;
+    font-weight: 900;
 }
 
-/* Gallery Hover */
-.gallery-item img {
-    border: 3px solid transparent;
-    transition: all 0.3s;
-}
-
-.gallery-item img:hover {
-    transform: scale(1.05);
-    border-color: var(--color-primary);
+.fx-preview {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 14px;
+    margin-bottom: 6px;
+    background-size: cover;
+    background-position: center;
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
